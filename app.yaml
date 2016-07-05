@@ -1,4 +1,5 @@
-application: samesite
+application: samesite-test
+version: prerelease-01
 runtime: go
 api_version: go1
 

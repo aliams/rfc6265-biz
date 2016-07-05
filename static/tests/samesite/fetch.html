@@ -7,25 +7,41 @@
 
   promise_test(t => {
     var COOKIE_VALUE = "" + Math.random();
-    return create_cookie(document.origin, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Lax")
+    return create_cookie(ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Lax")
       .then(_ => {
-        return assert_http_cookie(document.origin, HTTP_COOKIE, COOKIE_VALUE, true);
-      })
-  }, "Same-origin requests are laxly same-site.");
+        return assert_http_cookie(ORIGIN, HTTP_COOKIE, COOKIE_VALUE, true);
+      });
+  }, "Same-host requests are laxly same-site.");
 
   promise_test(t => {
     var COOKIE_VALUE = "" + Math.random();
-    return create_cookie(document.origin, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Strict")
+    return create_cookie(ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Strict")
       .then(_ => {
-        return assert_http_cookie(document.origin, HTTP_COOKIE, COOKIE_VALUE, true);
-      })
-  }, "Same-origin requests are strictly same-site.");
+        return assert_http_cookie(ORIGIN, HTTP_COOKIE, COOKIE_VALUE, true);
+      });
+  }, "Same-host requests are strictly same-site.");
 
   promise_test(t => {
     var COOKIE_VALUE = "" + Math.random();
-    return create_cookie("http://127.0.0.1:8080", HTTP_COOKIE, COOKIE_VALUE, "SameSite=Strict")
+    return create_cookie(SUBDOMAIN_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Lax")
       .then(_ => {
-        return assert_http_cookie("http://127.0.0.1:8080", HTTP_COOKIE, COOKIE_VALUE, false);
-      })
+        return assert_http_cookie(SUBDOMAIN_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, true);
+      });
+  }, "Requests to subdomains are laxly same-site.");
+
+  promise_test(t => {
+    var COOKIE_VALUE = "" + Math.random();
+    return create_cookie(SUBDOMAIN_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Strict")
+      .then(_ => {
+        return assert_http_cookie(SUBDOMAIN_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, true);
+      });
+  }, "Requests to subdomains are strictly same-site.");
+
+  promise_test(t => {
+    var COOKIE_VALUE = "" + Math.random();
+    return create_cookie(CROSS_SITE_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Strict")
+      .then(_ => {
+        return assert_http_cookie(CROSS_SITE_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, false);
+      });
   }, "Cross-origin requests are not same-site.");
 </script>
