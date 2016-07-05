@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<script src="/tests/resources/testharness.js"></script>
+<script src="/tests/resources/testharnessreport.js"></script>
+<script src="/tests/resources/cookie-helper.js"></script>
+<script>
+  var HTTP_COOKIE = "cookie_via_http";
+
+  function reject_if_not_present(origin, name, value) {
+    return new Promise((resolve, reject) => {
+      var img = document.createElement("img");
+      img.onload = resolve;
+      img.onerror = reject;
+      img.src = origin + "/cookie/imgIfMatch?name=" + name + "&value=" + value;
+    });
+  }
+
+  function reject_if_present(origin, name, value) {
+    return new Promise((resolve, reject) => {
+      reject_if_not_present(origin, name, value)
+        .then(reject)
+        .catch(resolve)
+    })
+  }
+
+  promise_test(t => {
+    var COOKIE_VALUE = "" + Math.random();
+    return create_cookie(ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Lax")
+      .then(_ => reject_if_not_present(ORIGIN, HTTP_COOKIE, COOKIE_VALUE));
+  }, "Same-host image requests are laxly same-site.");
+
+  promise_test(t => {
+    var COOKIE_VALUE = "" + Math.random();
+    return create_cookie(ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Strict")
+      .then(_ => reject_if_not_present(ORIGIN, HTTP_COOKIE, COOKIE_VALUE));
+  }, "Same-host image requests are strictly same-site.");
+
+  promise_test(t => {
+    var COOKIE_VALUE = "" + Math.random();
+    return create_cookie(SUBDOMAIN_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Lax")
+      .then(_ => reject_if_not_present(SUBDOMAIN_ORIGIN, HTTP_COOKIE, COOKIE_VALUE));
+  }, "Subdomain image requests are laxly same-site.");
+
+  promise_test(t => {
+    var COOKIE_VALUE = "" + Math.random();
+    return create_cookie(SUBDOMAIN_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Strict")
+      .then(_ => reject_if_not_present(SUBDOMAIN_ORIGIN, HTTP_COOKIE, COOKIE_VALUE));
+  }, "Subdomain image requests are strictly same-site.");
+
+  promise_test(t => {
+    var COOKIE_VALUE = "" + Math.random();
+    return create_cookie(CROSS_SITE_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Lax")
+      .then(_ => reject_if_present(CROSS_SITE_ORIGIN, HTTP_COOKIE, COOKIE_VALUE))
+  }, "Cross-site image requests are not laxly same-site.");
+
+  promise_test(t => {
+    var COOKIE_VALUE = "" + Math.random();
+    return create_cookie(CROSS_SITE_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Strict")
+      .then(_ => reject_if_present(CROSS_SITE_ORIGIN, HTTP_COOKIE, COOKIE_VALUE));
+  }, "Cross-site image requests are not strictly same-site.");
+
+  //
+  // Redirect variants of the above:
+  //
+  promise_test(t => {
+    var COOKIE_VALUE = "" + Math.random();
+    return create_cookie(ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Strict")
+      .then(_ => reject_if_not_present(redirectTo(ORIGIN, ORIGIN), HTTP_COOKIE, COOKIE_VALUE));
+  }, "Same-host image requests redirected to same-host are strictly same-site.");
+
+  promise_test(t => {
+    var COOKIE_VALUE = "" + Math.random();
+    return create_cookie(SUBDOMAIN_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Strict")
+      .then(_ => reject_if_not_present(redirectTo(ORIGIN, SUBDOMAIN_ORIGIN), HTTP_COOKIE, COOKIE_VALUE));
+  }, "Same-host image requests redirected to subdomain are strictly same-site.");
+
+  promise_test(t => {
+    var COOKIE_VALUE = "" + Math.random();
+    return create_cookie(ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Strict")
+      .then(_ => reject_if_not_present(redirectTo(SUBDOMAIN_ORIGIN, ORIGIN), HTTP_COOKIE, COOKIE_VALUE));
+  }, "Subdomain image requests redirected to same-host are strictly same-site.");
+
+  promise_test(t => {
+    var COOKIE_VALUE = "" + Math.random();
+    return create_cookie(CROSS_SITE_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Lax")
+      .then(_ => reject_if_present(redirectTo(ORIGIN, CROSS_SITE_ORIGIN), HTTP_COOKIE, COOKIE_VALUE));
+  }, "Same-host image requests redirected to cross-site are not same-site.");
+
+  promise_test(t => {
+    var COOKIE_VALUE = "" + Math.random();
+    return create_cookie(CROSS_SITE_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Lax")
+      .then(_ => reject_if_present(redirectTo(SUBDOMAIN_ORIGIN, CROSS_SITE_ORIGIN), HTTP_COOKIE, COOKIE_VALUE));
+  }, "Subdomain image requests redirected to cross-site are strictly same-site.");
+</script>

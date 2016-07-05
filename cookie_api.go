@@ -9,16 +9,15 @@ import (
 
 // Set up all of our handlers.
 func init() {
-  http.HandleFunc("/", defaultHandler)
-  http.HandleFunc("/redir", redirectHandler)
   http.HandleFunc("/cookie/drop", dropCookie)
+  http.HandleFunc("/cookie/imgIfMatch", imgIfCookieMatch)
   http.HandleFunc("/cookie/list", listCookie)
   http.HandleFunc("/cookie/set", setCookie)
   http.HandleFunc("/cookie/postToParent", postToParent)
 }
 
 // Set wide-open CORS and no-cache headers on |w|, given |r|'s `Origin` header.
-func setResponseHeaders(w http.ResponseWriter, r *http.Request) {
+func setNoCacheAndCORSHeaders(w http.ResponseWriter, r *http.Request) {
   origin := r.Header.Get("Origin")
   if origin == "" {
     origin = "*"
@@ -38,10 +37,33 @@ func dropCookie(w http.ResponseWriter, r *http.Request) {
   }
 
   // Expire the named cookie, and return a JSON-encoded success code.
-  setResponseHeaders(w, r)
+  setNoCacheAndCORSHeaders(w, r)
   w.Header().Set("Content-Type", "application/json; charset=utf-8")
   http.SetCookie(w, &http.Cookie{Name: name, Value: "_", MaxAge: -1})
   fmt.Fprint(w, "{\"success\": true}")
+}
+
+// Respond to `/cookie/imgIfMatch?name={name}&value={value}` with a 404
+// if the cookie isn't present, and a transparent GIF otherwise.
+func imgIfCookieMatch(w http.ResponseWriter, r *http.Request) {
+  name := r.FormValue("name")
+  value := r.FormValue("value")
+  if len(name) == 0 || len(value) == 0 {
+    http.Error(w, "`name` and `value` parameters must be present.", http.StatusInternalServerError)
+    return
+  }
+
+  cookie, _ := r.Cookie(name)
+  if cookie.Value != value {
+    http.Error(w, "The cookie's value did not match the given value.", http.StatusInternalServerError)
+    return
+  }
+
+  // From https://github.com/mathiasbynens/small/blob/master/gif-transparent.gif
+  setNoCacheAndCORSHeaders(w, r)
+  w.Header().Set("Content-Type", "image/gif")
+  const gif = "\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\xFF\xFF\xFF\x00\x00\x00\x21\xF9\x04\x01\x00\x00\x00\x00\x2C\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x44\x01\x00\x3B"
+  fmt.Fprint(w, gif)
 }
 
 // Strip |r|'s cookies down to a name/value pair (as we don't actually
@@ -57,9 +79,7 @@ func extractRequestCookies(r *http.Request) map[string]string {
 // Respond to `/cookie/list` by dumping the cookies contained in the request as
 // a JSON-encoded string of Name/Value tuples.
 func listCookie(w http.ResponseWriter, r *http.Request) {
-  // Stringify the resulting array, and deliver it as JSON with wide-open CORS
-  // headers in order to allow access from everywhere.
-  setResponseHeaders(w, r)
+  setNoCacheAndCORSHeaders(w, r)
   w.Header().Set("Content-Type", "application/json; charset=utf-8")
   err := json.NewEncoder(w).Encode(extractRequestCookies(r))
   if err != nil {
@@ -71,7 +91,7 @@ func listCookie(w http.ResponseWriter, r *http.Request) {
 // Respond to `/cookie/postToParent` by sending the same list of cookies generated
 // for `/cookie/list` to a parent window via `postMessage`.
 func postToParent(w http.ResponseWriter, r *http.Request) {
-  setResponseHeaders(w, r)
+  setNoCacheAndCORSHeaders(w, r)
   w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
   const tmpl = `
@@ -99,28 +119,12 @@ func postToParent(w http.ResponseWriter, r *http.Request) {
 func setCookie(w http.ResponseWriter, r *http.Request) {
   query := r.URL.RawQuery
   if len(query) == 0 {
-    http.Error(w, "No cookie present in the URL's query.", http.StatusInternalServerError)
+    http.Error(w, "{\"success\": false, \"reason\": \"No cookie present in the URL's query\"}", http.StatusInternalServerError)
     return
   }
 
-  setResponseHeaders(w, r)
+  setNoCacheAndCORSHeaders(w, r)
+  w.Header().Set("Content-Type", "application/json; charset=utf-8")
   w.Header().Add("Set-Cookie", query)
-  fmt.Fprint(w, fmt.Sprintf("Wrote `%s`.", query))
-}
-
-// Respond to `/` with a friendly message.
-func defaultHandler(w http.ResponseWriter, r *http.Request) {
-  fmt.Fprint(w, "Hello!");
-}
-
-// Respond to `/redir` by redirecting to the URL's query.
-func redirectHandler(w http.ResponseWriter, r *http.Request) {
-  query := r.URL.RawQuery
-  if len(query) == 0 {
-    http.Error(w, "No cookie present in the URL's query.", http.StatusInternalServerError)
-    return
-  }
-
-  setResponseHeaders(w, r)
-  http.Redirect(w, r, query, http.StatusTemporaryRedirect);
+  fmt.Fprint(w, "{\"success\": true}")
 }

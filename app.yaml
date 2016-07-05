@@ -1,4 +1,4 @@
-application: samesite-test
+application: rfc6265biz
 version: prerelease-01
 runtime: go
 api_version: go1
