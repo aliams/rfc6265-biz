@@ -3,6 +3,11 @@ function credFetch(url) {
   return fetch(url, {"credentials": "include"});
 }
 
+// Returns a URL on |origin| which redirects to a given absolute URL.
+function redirectTo(origin, url) {
+  return origin + "/redir?" + url;
+}
+
 // Asserts that `document.cookie` contains or does not contain (according to
 // the value of |present|) a cookie named |name| with a value of |value|.
 function assert_dom_cookie(name, value, present) {
@@ -74,4 +79,8 @@ function embed_cookie_posting_iframe(origin) {
   window.WWW_ORIGIN = "http://www." + HOST + PORT;
   window.SUBDOMAIN_ORIGIN = "http://subdomain." + HOST + PORT;
   window.CROSS_SITE_ORIGIN = "http://" + CROSS_ORIGIN_HOST + PORT;
+
+  // If we're not on |HOST|, move ourselves there:
+  if (window.location.hostname != HOST)
+    window.location.hostname = HOST;
 })();

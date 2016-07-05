@@ -44,4 +44,47 @@
         return assert_http_cookie(CROSS_SITE_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, false);
       });
   }, "Cross-origin requests are not same-site.");
+
+  //
+  // Redirected Variants of the above tests:
+  //
+  promise_test(t => {
+    var COOKIE_VALUE = "" + Math.random();
+    return create_cookie(ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Strict")
+      .then(_ => {
+        return assert_http_cookie(redirectTo(ORIGIN, ORIGIN), HTTP_COOKIE, COOKIE_VALUE, true);
+      });
+  }, "Same-host requests redirected to same-host are strictly same-site.");
+
+  promise_test(t => {
+    var COOKIE_VALUE = "" + Math.random();
+    return create_cookie(SUBDOMAIN_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Strict")
+      .then(_ => {
+        return assert_http_cookie(redirectTo(ORIGIN, SUBDOMAIN_ORIGIN), HTTP_COOKIE, COOKIE_VALUE, true);
+      });
+  }, "Same-host requests redirected to subdomains are strictly same-site.");
+
+  promise_test(t => {
+    var COOKIE_VALUE = "" + Math.random();
+    return create_cookie(ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Strict")
+      .then(_ => {
+        return assert_http_cookie(redirectTo(SUBDOMAIN_ORIGIN, ORIGIN), HTTP_COOKIE, COOKIE_VALUE, true);
+      });
+  }, "Subdomain requests redirected to same-host are strictly same-site.");
+
+  promise_test(t => {
+    var COOKIE_VALUE = "" + Math.random();
+    return create_cookie(CROSS_SITE_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Lax")
+      .then(_ => {
+        return assert_http_cookie(redirectTo(ORIGIN, CROSS_SITE_ORIGIN), HTTP_COOKIE, COOKIE_VALUE, false);
+      });
+  }, "Requests redirected from same-host to cross-origin are not same-site.");
+
+  promise_test(t => {
+    var COOKIE_VALUE = "" + Math.random();
+    return create_cookie(ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Strict")
+      .then(_ => {
+        return assert_http_cookie(redirectTo(CROSS_SITE_ORIGIN, ORIGIN), HTTP_COOKIE, COOKIE_VALUE, false);
+      });
+  }, "Requests redirected from cross-origin to same-host are not same-site.");
 </script>
