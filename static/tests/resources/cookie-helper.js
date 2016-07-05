@@ -69,7 +69,7 @@ function embed_cookie_posting_iframe(origin) {
 (_ => {
   var HOST = "rfc6265.biz";
   var PORT = "";
-  var CROSS_ORIGIN_HOST = "samesite-test.appspot.com";
+  var CROSS_ORIGIN_HOST = "rfc6265biz.appspot.com";
   if (window.location.hostname.match(/rfc6265.test$/)) {
     PORT = ":8080"
     HOST = "rfc6265.test";
