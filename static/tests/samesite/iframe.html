@@ -4,125 +4,63 @@
 <script src="/tests/resources/cookie-helper.js"></script>
 <body>
 <script>
-  var HTTP_COOKIE = "cookie_via_http";
-
-  promise_test(t => {
-    var COOKIE_VALUE = "" + Math.random();
-    return create_cookie(ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Lax")
-      .then(_ => embed_cookie_posting_iframe(ORIGIN))
-      .then(cookies => {
-        assert_cookie(ORIGIN, cookies, HTTP_COOKIE, COOKIE_VALUE, true);
+  // Embed `/cookie/postToParent` on |origin|, returning a Promise which will
+  // resolve with the cookie data it posts.
+  function embed_cookie_posting_iframe(origin) {
+    return new Promise((resolve, reject) => {
+      var iframe = document.createElement("iframe");
+      iframe.src = origin + "/cookie/postToParent";
+      document.body.appendChild(iframe);
+      window.addEventListener("message", e => {
+        if (e.source == iframe.contentWindow) {
+          document.body.removeChild(iframe);
+          resolve(e.data);
+        }
       });
-  }, "Same-host frames are laxly same-site.");
+      iframe.onerror = reject;
+    });
+  }
 
-  promise_test(t => {
-    var COOKIE_VALUE = "" + Math.random();
-    return create_cookie(ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Strict")
-      .then(_ => embed_cookie_posting_iframe(ORIGIN))
-      .then(cookies => {
-        assert_cookie(ORIGIN, cookies, HTTP_COOKIE, COOKIE_VALUE, true);
-      });
-  }, "Same-host frames are strictly same-site.");
+  function create_test(origin, target, extra, expected, title) {
+    promise_test(t => {
+      var COOKIE_VALUE = "" + Math.random();
+      return create_cookie(origin, HTTP_COOKIE, COOKIE_VALUE, extra)
+        .then(_ => embed_cookie_posting_iframe(target))
+        .then(cookies => {
+          assert_cookie(target, cookies, HTTP_COOKIE, COOKIE_VALUE, expected);
+        });
+    }, title);
+  }
 
-  promise_test(t => {
-    var COOKIE_VALUE = "" + Math.random();
-    return create_cookie(SUBDOMAIN_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Lax")
-      .then(_ => embed_cookie_posting_iframe(SUBDOMAIN_ORIGIN))
-      .then(cookies => {
-        assert_cookie(SUBDOMAIN_ORIGIN, cookies, HTTP_COOKIE, COOKIE_VALUE, true);
-      });
-  }, "Subdomain frames are laxly same-site.");
+  // No redirect:
+  create_test(ORIGIN, ORIGIN, "SameSite=Lax", true, "Same-host frames are laxly same-site");
+  create_test(ORIGIN, ORIGIN, "SameSite=Strict", true, "Same-host frames are strictly same-site");
+  create_test(SUBDOMAIN_ORIGIN, SUBDOMAIN_ORIGIN, "SameSite=Lax", true, "Subdomain frames are laxly same-site");
+  create_test(SUBDOMAIN_ORIGIN, SUBDOMAIN_ORIGIN, "SameSite=Strict", true, "Subdomain frames are strictly same-site");
+  create_test(CROSS_SITE_ORIGIN, CROSS_SITE_ORIGIN, "SameSite=Lax", false, "Cross-site frames are not laxly same-site");
+  create_test(CROSS_SITE_ORIGIN, CROSS_SITE_ORIGIN, "SameSite=Strict", false, "Subdomain frames are not strictly same-site");
 
-  promise_test(t => {
-    var COOKIE_VALUE = "" + Math.random();
-    return create_cookie(SUBDOMAIN_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Strict")
-      .then(_ => embed_cookie_posting_iframe(SUBDOMAIN_ORIGIN))
-      .then(cookies => {
-        assert_cookie(SUBDOMAIN_ORIGIN, cookies, HTTP_COOKIE, COOKIE_VALUE, true);
-      });
-  }, "Subdomain frames are strictly same-site.");
+  // Redirect from {same-host,subdomain,cross-site} to same-host:
+  create_test(ORIGIN, redirectTo(ORIGIN, ORIGIN), "SameSite=Lax", true, "Same-host redirecting to same-host frames are laxly same-site");
+  create_test(ORIGIN, redirectTo(ORIGIN, ORIGIN), "SameSite=Strict", true, "Same-host redirecting to same-host frames are strictly same-site");
+  create_test(ORIGIN, redirectTo(SUBDOMAIN_ORIGIN, ORIGIN), "SameSite=Lax", true, "Subdomain redirecting to same-host frames are laxly same-site");
+  create_test(ORIGIN, redirectTo(SUBDOMAIN_ORIGIN, ORIGIN), "SameSite=Strict", true, "Subdomain redirecting to same-host frames are strictly same-site");
+  create_test(ORIGIN, redirectTo(CROSS_SITE_ORIGIN, ORIGIN), "SameSite=Lax", true, "Cross-site redirecting to same-host frames are laxly same-site");
+  create_test(ORIGIN, redirectTo(CROSS_SITE_ORIGIN, ORIGIN), "SameSite=Strict", true, "Cross-site redirecting to same-host frames are strictly same-site");
 
-  promise_test(t => {
-    var COOKIE_VALUE = "" + Math.random();
-    return create_cookie(CROSS_SITE_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Lax")
-      .then(_ => embed_cookie_posting_iframe(CROSS_SITE_ORIGIN))
-      .then(cookies => {
-        assert_cookie(CROSS_SITE_ORIGIN, cookies, HTTP_COOKIE, COOKIE_VALUE, false);
-      });
-  }, "Cross-site frames are not laxly same-site.");
+  // Redirect from {same-host,subdomain,cross-site} to subdomain:
+  create_test(SUBDOMAIN_ORIGIN, redirectTo(ORIGIN, SUBDOMAIN_ORIGIN), "SameSite=Lax", true, "Same-host redirecting to subdomain frames are laxly same-site");
+  create_test(SUBDOMAIN_ORIGIN, redirectTo(ORIGIN, SUBDOMAIN_ORIGIN), "SameSite=Strict", true, "Same-host redirecting to subdomain frames are strictly same-site");
+  create_test(SUBDOMAIN_ORIGIN, redirectTo(SUBDOMAIN_ORIGIN, SUBDOMAIN_ORIGIN), "SameSite=Lax", true, "Subdomain redirecting to subdomain frames are laxly same-site");
+  create_test(SUBDOMAIN_ORIGIN, redirectTo(SUBDOMAIN_ORIGIN, SUBDOMAIN_ORIGIN), "SameSite=Strict", true, "Subdomain redirecting to subdomain frames are strictly same-site");
+  create_test(SUBDOMAIN_ORIGIN, redirectTo(CROSS_SITE_ORIGIN, SUBDOMAIN_ORIGIN), "SameSite=Lax", true, "Cross-site redirecting to subdomain frames are laxly same-site");
+  create_test(SUBDOMAIN_ORIGIN, redirectTo(CROSS_SITE_ORIGIN, SUBDOMAIN_ORIGIN), "SameSite=Strict", true, "Cross-site redirecting to subdomain frames are strictly same-site");
 
-  promise_test(t => {
-    var COOKIE_VALUE = "" + Math.random();
-    return create_cookie(CROSS_SITE_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Strict")
-      .then(_ => embed_cookie_posting_iframe(CROSS_SITE_ORIGIN))
-      .then(cookies => {
-        assert_cookie(CROSS_SITE_ORIGIN, cookies, HTTP_COOKIE, COOKIE_VALUE, false);
-      });
-  }, "Cross-site frames are not strictly same-site.");
-
-  //
-  // Redirected variants of the above:
-  //
-  promise_test(t => {
-    var COOKIE_VALUE = "" + Math.random();
-    return create_cookie(ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Strict")
-      .then(_ => embed_cookie_posting_iframe(redirectTo(ORIGIN, ORIGIN)))
-      .then(cookies => {
-        assert_cookie(ORIGIN, cookies, HTTP_COOKIE, COOKIE_VALUE, true);
-      });
-  }, "Same-host frames redirected to same-host are strictly same-site.");
-
-  promise_test(t => {
-    var COOKIE_VALUE = "" + Math.random();
-    return create_cookie(SUBDOMAIN_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Strict")
-      .then(_ => embed_cookie_posting_iframe(redirectTo(ORIGIN, SUBDOMAIN_ORIGIN)))
-      .then(cookies => {
-        assert_cookie(SUBDOMAIN_ORIGIN, cookies, HTTP_COOKIE, COOKIE_VALUE, true);
-      });
-  }, "Same-host frames redirected to subdomain are strictly same-site.");
-
-  promise_test(t => {
-    var COOKIE_VALUE = "" + Math.random();
-    return create_cookie(ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Strict")
-      .then(_ => embed_cookie_posting_iframe(redirectTo(SUBDOMAIN_ORIGIN, ORIGIN)))
-      .then(cookies => {
-        assert_cookie(ORIGIN, cookies, HTTP_COOKIE, COOKIE_VALUE, true);
-      });
-  }, "Subdomain frames redirected to same-host are strictly same-site.");
-
-  promise_test(t => {
-    var COOKIE_VALUE = "" + Math.random();
-    return create_cookie(CROSS_SITE_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Lax")
-      .then(_ => embed_cookie_posting_iframe(redirectTo(ORIGIN, CROSS_SITE_ORIGIN)))
-      .then(cookies => {
-        assert_cookie(CROSS_SITE_ORIGIN, cookies, HTTP_COOKIE, COOKIE_VALUE, false);
-      });
-  }, "Same-host frames redirected to cross-site are not same-site.");
-
-  promise_test(t => {
-    var COOKIE_VALUE = "" + Math.random();
-    return create_cookie(CROSS_SITE_ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Lax")
-      .then(_ => embed_cookie_posting_iframe(redirectTo(SUBDOMAIN_ORIGIN, CROSS_SITE_ORIGIN)))
-      .then(cookies => {
-        assert_cookie(CROSS_SITE_ORIGIN, cookies, HTTP_COOKIE, COOKIE_VALUE, false);
-      });
-  }, "Subdomain frames redirected to cross-site are not same-site.");
-
-  promise_test(t => {
-    var COOKIE_VALUE = "" + Math.random();
-    return create_cookie(ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Lax")
-      .then(_ => embed_cookie_posting_iframe(redirectTo(CROSS_SITE_ORIGIN, ORIGIN)))
-      .then(cookies => {
-        assert_cookie(ORIGIN, cookies, HTTP_COOKIE, COOKIE_VALUE, true);
-      });
-  }, "(TODO?) Cross-site frames redirected to same-host are laxly same-site.");
-
-  promise_test(t => {
-    var COOKIE_VALUE = "" + Math.random();
-    return create_cookie(ORIGIN, HTTP_COOKIE, COOKIE_VALUE, "SameSite=Strict")
-      .then(_ => embed_cookie_posting_iframe(redirectTo(CROSS_SITE_ORIGIN, ORIGIN)))
-      .then(cookies => {
-        assert_cookie(ORIGIN, cookies, HTTP_COOKIE, COOKIE_VALUE, true);
-      });
-  }, "(TODO?) Cross-site frames redirected to same-host are strictly same-site.");
+  // Redirect from {same-host,subdomain,cross-site} to cross-site:
+  create_test(CROSS_SITE_ORIGIN, redirectTo(ORIGIN, CROSS_SITE_ORIGIN), "SameSite=Lax", false, "Same-host redirecting to cross-site frames are laxly same-site");
+  create_test(CROSS_SITE_ORIGIN, redirectTo(ORIGIN, CROSS_SITE_ORIGIN), "SameSite=Strict", false, "Same-host redirecting to cross-site frames are not strictly same-site");
+  create_test(CROSS_SITE_ORIGIN, redirectTo(SUBDOMAIN_ORIGIN, CROSS_SITE_ORIGIN), "SameSite=Lax", false, "Subdomain redirecting to cross-site frames are laxly same-site");
+  create_test(CROSS_SITE_ORIGIN, redirectTo(SUBDOMAIN_ORIGIN, CROSS_SITE_ORIGIN), "SameSite=Strict", false, "Subdomain redirecting to cross-site frames are strictly same-site");
+  create_test(CROSS_SITE_ORIGIN, redirectTo(CROSS_SITE_ORIGIN, CROSS_SITE_ORIGIN), "SameSite=Lax", false, "Cross-site redirecting to cross-site frames are laxly same-site");
+  create_test(CROSS_SITE_ORIGIN, redirectTo(CROSS_SITE_ORIGIN, CROSS_SITE_ORIGIN), "SameSite=Strict", false, "Cross-site redirecting to cross-site frames are strictly same-site");
 </script>

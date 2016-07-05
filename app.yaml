@@ -4,6 +4,9 @@ runtime: go
 api_version: go1
 
 handlers:
+- url: /tests/
+  static_files: static/tests/index.html
+  upload: static/tests/index.html
 - url: /tests
   static_dir: static/tests
 - url: /.*
