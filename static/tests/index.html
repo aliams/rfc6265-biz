@@ -24,6 +24,7 @@
 
     table tbody td {
       padding: 5px;
+      text-align: center;
     }
 
     .complete {
@@ -65,7 +66,11 @@
   <table>
     <thead>
       <tr>
-        <th rowspan="2">Test Suite</th><th colspan="4">Chrome</th>
+        <th rowspan="2">Test Suite</th>
+        <th colspan="4">Chrome</th>
+        <th rowspan="2">Firefox<br>(<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=795346">#795346</a>)</th>
+        <th rowspan="2">Safari<br>(<a href="https://bugs.webkit.org/show_bug.cgi?id=159464">#159464</a>)</th>
+        <th rowspan="2">Edge<br>(<a href="https://github.com/MicrosoftEdge/Status/issues/201">#201</a>)</th>
       </tr>
       <tr>
         <th>51</th><th>52</th><th>53</th><th>54</th>
@@ -74,46 +79,87 @@
     <tbody>
       <tr>
         <td><a href="samesite/fetch.html"><code>fetch()</code></a></td>
-
+        <!-- Chrome -->
         <td class="partial">7/12</td>
         <td class="partial">7/12</td>
         <td class="complete">12/12</td>
         <td class="complete">12/12</td>
+        <!-- Firefox -->
+        <td class="nada">0/12</td>
+        <!-- Safari -->
+        <td class="nada">0/12</td>
+        <!-- Edge -->
+        <td class="nada">0/12</td>
       </tr>
       <tr>
         <td><a href="samesite/form-get-blank.html"><code>&lt;form method="GET" target="_blank"&gt;</code></a></td>
+        <!-- Chrome -->
         <td class="complete">12/12</td>
         <td class="complete">12/12</td>
         <td class="complete">12/12</td>
         <td class="complete">12/12</td>
+        <!-- Firefox -->
+        <td class="nada">0/12</td>
+        <!-- Safari -->
+        <td class="nada">0/12</td>
+        <!-- Edge -->
+        <td class="nada">0/12</td>
       </tr>
       <tr>
         <td><a href="samesite/form-post-blank.html"><code>&lt;form method="POST" target="_blank"&gt;</code></a></td>
+        <!-- Chrome -->
         <td class="complete">12/12</td>
         <td class="complete">12/12</td>
         <td class="complete">12/12</td>
         <td class="complete">12/12</td>
+        <!-- Firefox -->
+        <td class="nada">0/12</td>
+        <!-- Safari -->
+        <td class="nada">0/12</td>
+        <!-- Edge -->
+        <td class="nada">0/12</td>
       </tr>
       <tr>
         <td><a href="samesite/iframe.html"><code>&lt;iframe&gt;</code></a></td>
+        <!-- Chrome -->
         <td class="complete">12/12</td>
         <td class="complete">12/12</td>
         <td class="complete">12/12</td>
         <td class="complete">12/12</td>
+        <!-- Firefox -->
+        <td class="nada">0/12</td>
+        <!-- Safari -->
+        <td class="nada">0/12</td>
+        <!-- Edge -->
+        <td class="nada">0/12</td>
       </tr>
       <tr>
         <td><a href="samesite/img.html"><code>&lt;img&gt;</code></a></td>
+        <!-- Chrome -->
         <td class="complete">12/12</td>
         <td class="complete">12/12</td>
         <td class="complete">12/12</td>
         <td class="complete">12/12</td>
+        <!-- Firefox -->
+        <td class="nada">0/12</td>
+        <!-- Safari -->
+        <td class="nada">0/12</td>
+        <!-- Edge -->
+        <td class="nada">0/12</td>
       </tr>
       <tr>
-        <td><a href="samesite/window-open.html"><code>window.open()</code></a>/td>
+        <td><a href="samesite/window-open.html"><code>window.open()</code></a></td>
+        <!-- Chrome -->
         <td class="complete">12/12</td>
         <td class="complete">12/12</td>
         <td class="complete">12/12</td>
         <td class="complete">12/12</td>
+        <!-- Firefox -->
+        <td class="nada">0/12</td>
+        <!-- Safari -->
+        <td class="nada">0/12</td>
+        <!-- Edge -->
+        <td class="nada">0/12</td>
       </tr>
     </tbody>
   </table>
