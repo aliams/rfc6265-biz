@@ -9,11 +9,16 @@ import (
 
 // Set up all of our handlers.
 func init() {
+  // Generic test helpers:
   http.HandleFunc("/cookie/drop", dropCookie)
   http.HandleFunc("/cookie/imgIfMatch", imgIfCookieMatch)
   http.HandleFunc("/cookie/list", listCookie)
   http.HandleFunc("/cookie/set", setCookie)
   http.HandleFunc("/cookie/postToParent", postToParent)
+
+  // SameSite test helpers:
+  http.HandleFunc("/cookie/drop/samesite", dropSameSiteTestCookies)
+  http.HandleFunc("/cookie/set/samesite", setSameSiteTestCookies)
 }
 
 // Set wide-open CORS and no-cache headers on |w|, given |r|'s `Origin` header.
@@ -126,5 +131,44 @@ func setCookie(w http.ResponseWriter, r *http.Request) {
   setNoCacheAndCORSHeaders(w, r)
   w.Header().Set("Content-Type", "application/json; charset=utf-8")
   w.Header().Add("Set-Cookie", query)
+  fmt.Fprint(w, "{\"success\": true}")
+}
+
+//
+// SameSite test helpers:
+//
+
+// Respond to `/cookie/drop/samesite` by dropping the four cookie set
+// by `setSameSiteTestCookies()`
+func dropSameSiteTestCookies(w http.ResponseWriter, r *http.Request) {
+  // Expire the named cookie, and return a JSON-encoded success code.
+  setNoCacheAndCORSHeaders(w, r)
+  w.Header().Set("Content-Type", "application/json; charset=utf-8")
+  http.SetCookie(w, &http.Cookie{Name: "samesite_strict", Value: "_", MaxAge: -1})
+  http.SetCookie(w, &http.Cookie{Name: "samesite_lax", Value: "_", MaxAge: -1})
+  http.SetCookie(w, &http.Cookie{Name: "samesite_invalid", Value: "_", MaxAge: -1})
+  http.SetCookie(w, &http.Cookie{Name: "samesite_none", Value: "_", MaxAge: -1})
+  fmt.Fprint(w, "{\"success\": true}")
+}
+
+// Respond to `/cookie/set/samesite?{value}` by setting four cookies:
+//
+// 1. `samesite_strict={value};SameSite=Strict;path=/`
+// 2. `samesite_lax={value};SameSite=Lax;path=/`
+// 3. `samesite_invalid={value};SameSite=Invalid;path=/`
+// 4. `samesite_none={value};path=/`
+func setSameSiteTestCookies(w http.ResponseWriter, r *http.Request) {
+  value := r.URL.RawQuery
+  if len(value) == 0 {
+    http.Error(w, "{\"success\": false, \"reason\": \"No value present in the URL's query\"}", http.StatusInternalServerError)
+    return
+  }
+
+  setNoCacheAndCORSHeaders(w, r)
+  w.Header().Set("Content-Type", "application/json; charset=utf-8")
+  w.Header().Add("Set-Cookie", fmt.Sprintf("samesite_strict=%s;SameSite=Strict;path=/", value))
+  w.Header().Add("Set-Cookie", fmt.Sprintf("samesite_lax=%s;SameSite=Lax;path=/", value))
+  w.Header().Add("Set-Cookie", fmt.Sprintf("samesite_invalid=%s;SameSite=Invalid;path=/", value))
+  w.Header().Add("Set-Cookie", fmt.Sprintf("samesite_none=%s;path=/", value))
   fmt.Fprint(w, "{\"success\": true}")
 }
