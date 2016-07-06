@@ -22,8 +22,13 @@
       color: #FFF;
     }
 
+    table tbody td {
+      padding: 5px;
+    }
+
     .complete {
       background: #4A4;
+      color: #FFF;
     }
 
     .partial {
@@ -47,33 +52,55 @@
   <table>
     <thead>
       <tr>
-        <th>Test Suite</th><th>Chrome</th>
+        <th rowspan="2">Test Suite</th><th colspan="4">Chrome</th>
+      </tr>
+      <tr>
+        <th>51</th><th>52</th><th>53</th><th>54</th>
       </tr>
     </thead>
     <tbody>
       <tr>
         <td><a href="samesite/fetch.html"><code>fetch()</code></td>
-        <td class="complete">24/24</td>
+
+        <td class="partial">7/12</td>
+        <td class="partial">7/12</td>
+        <td class="complete">12/12</td>
+        <td class="complete">12/12</td>
       </tr>
       <tr>
         <td><a href="samesite/form-get-blank.html"><code>&lt;form method="GET" target="_blank"&gt;</code></td>
-        <td class="nada">TODO</td>
+        <td class="complete">12/12</td>
+        <td class="complete">12/12</td>
+        <td class="complete">12/12</td>
+        <td class="complete">12/12</td>
       </tr>
       <tr>
         <td><a href="samesite/form-post-blank.html"><code>&lt;form method="POST" target="_blank"&gt;</code></td>
-        <td class="complete">24/24</td>
+        <td class="complete">12/12</td>
+        <td class="complete">12/12</td>
+        <td class="complete">12/12</td>
+        <td class="complete">12/12</td>
       </tr>
       <tr>
         <td><a href="samesite/iframe.html"><code>&lt;iframe&gt;</code></td>
-        <td class="complete">24/24</td>
+        <td class="complete">12/12</td>
+        <td class="complete">12/12</td>
+        <td class="complete">12/12</td>
+        <td class="complete">12/12</td>
       </tr>
       <tr>
         <td><a href="samesite/img.html"><code>&lt;img&gt;</code></td>
-        <td class="complete">24/24</td>
+        <td class="complete">12/12</td>
+        <td class="complete">12/12</td>
+        <td class="complete">12/12</td>
+        <td class="complete">12/12</td>
       </tr>
       <tr>
         <td><a href="samesite/window-open.html"><code>window.open()</code></td>
-        <td class="complete">24/24</td>
+        <td class="complete">12/12</td>
+        <td class="complete">12/12</td>
+        <td class="complete">12/12</td>
+        <td class="complete">12/12</td>
       </tr>
     </tbody>
   </table>

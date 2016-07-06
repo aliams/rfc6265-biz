@@ -31,7 +31,7 @@ function credFetch(url) {
 
 // Returns a URL on |origin| which redirects to a given absolute URL.
 function redirectTo(origin, url) {
-  return origin + "/redir?" + url;
+  return origin + "/redir?to=" + encodeURIComponent(url);
 }
 
 // Asserts that `document.cookie` contains or does not contain (according to

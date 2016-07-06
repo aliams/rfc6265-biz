@@ -8,7 +8,12 @@
       var img = document.createElement("img");
       img.onload = _ => resolve("'" + name + "=" + value + "' present on " + origin);
       img.onerror = _ => reject("'" + name + "=" + value + "' not present on " + origin);
-      img.src = origin + "/cookie/imgIfMatch?name=" + name + "&value=" + value;
+
+      // We need to URL encode the destination path/query if we're redirecting:
+      if (origin.match(/\/redir/))
+        img.src = origin + encodeURIComponent("/cookie/imgIfMatch?name=" + name + "&value=" + value);
+      else
+        img.src = origin + "/cookie/imgIfMatch?name=" + name + "&value=" + value;
     });
   }
 
@@ -17,7 +22,12 @@
       var img = document.createElement("img");
       img.onload = _ => reject("'" + name + "=" + value + "' present on " + origin);
       img.onerror = _ => resolve("'" + name + "=" + value + "' not present on " + origin);
-      img.src = origin + "/cookie/imgIfMatch?name=" + name + "&value=" + value;
+
+      // We need to URL encode the destination path/query if we're redirecting:
+      if (origin.match(/\/redir/))
+        img.src = origin + encodeURIComponent("/cookie/imgIfMatch?name=" + name + "&value=" + value);
+      else
+        img.src = origin + "/cookie/imgIfMatch?name=" + name + "&value=" + value;
     });
   }
 

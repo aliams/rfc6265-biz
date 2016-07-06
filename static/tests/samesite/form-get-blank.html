@@ -2,81 +2,62 @@
 <script src="/tests/resources/testharness.js"></script>
 <script src="/tests/resources/testharnessreport.js"></script>
 <script src="/tests/resources/cookie-helper.js"></script>
-<body>
 <script>
-  // Post to `/cookie/postToParent` on |origin|, returning a Promise which will
-  // resolve with the cookie data it posts.
-  function assertPopupReceivesCookie(origin, name, value) {
-    return new Promise((resolve, reject) => {
-      var f = document.createElement('form');
-      f.action = origin + "/cookie/postToParent";
-      f.target = "_blank";
-      f.method = "GET";
-      window.addEventListener("message", e => {
-        // We know that there's only one window postMessaging here at a time (I hope).
-        e.source.close();
-        try {
-          assert_cookie(origin, e.data, name, value, true);
-          resolve("Popup received the cookie.");
-        } catch (e) {
-          reject(e);
-        }
-      });
-      f.submit();
-    });
-  }
-
-  // Invert the above results.
-  function assertPopupDoesNotReceiveCookie(origin, name, value) {
-    return new Promise((resolve, reject) => {
-      assertPopupReceivesCookie(origin, name, value)
-        .then(reject)
-        .catch(_ => resolve("Popup did not receive the cookie."))
-    })
-  }
-
-  function create_test(origin, target, extra, expected, title) {
+  function create_test(origin, target, expectedStatus, title) {
     promise_test(t => {
-      var COOKIE_VALUE = "" + Math.random();
-      return create_cookie(origin, HTTP_COOKIE, COOKIE_VALUE, extra)
+      var value = "" + Math.random();
+      return resetSameSiteCookies(origin, value)
         .then(_ => {
-          if (expected)
-            return assertPopupReceivesCookie(target, HTTP_COOKIE, COOKIE_VALUE)
-          else
-            return assertPopupDoesNotReceiveCookie(target, HTTP_COOKIE, COOKIE_VALUE)
+          return new Promise((resolve, reject) => {
+            var f = document.createElement('form');
+            f.action = target + "/cookie/postToParent";
+            f.target = "_blank";
+            f.method = "GET";
+
+            // If |target| contains a `redir` parameter, extract it, and add it
+            // to the form so it doesn't get dropped in the submission.
+            var url = new URL(f.action);
+            if (url.pathname = "/redir") {
+              var i = document.createElement("input");
+              i.name = "to";
+              i.value = url.searchParams.get("to");
+              f.appendChild(i);
+            }
+            
+            var msgHandler = e => {
+              window.removeEventListener("message", msgHandler);
+              e.source.close();
+              try {
+                verifySameSiteCookieState(expectedStatus, value, e.data);
+                resolve("Popup received the cookie.");
+              } catch (e) {
+                reject(e);
+              }
+            };
+            window.addEventListener("message", msgHandler);
+            f.submit();
+          });
         });
     }, title);
   }
 
   // No redirect:
-  create_test(ORIGIN, ORIGIN, "SameSite=Lax", true, "Same-host GETs to '_blank' are laxly same-site");
-  create_test(ORIGIN, ORIGIN, "SameSite=Strict", true, "Same-host GETs to '_blank' are strictly same-site");
-  create_test(SUBDOMAIN_ORIGIN, SUBDOMAIN_ORIGIN, "SameSite=Lax", true, "Subdomain GETs to '_blank' are laxly same-site");
-  create_test(SUBDOMAIN_ORIGIN, SUBDOMAIN_ORIGIN, "SameSite=Strict", true, "Subdomain GETs to '_blank' are strictly same-site");
-  create_test(CROSS_SITE_ORIGIN, CROSS_SITE_ORIGIN, "SameSite=Lax", true, "Cross-site GETs to '_blank' are laxly same-site");
-  create_test(CROSS_SITE_ORIGIN, CROSS_SITE_ORIGIN, "SameSite=Strict", false, "Subdomain GETs to '_blank' are not strictly same-site");
+  create_test(ORIGIN, ORIGIN, SameSiteStatus.STRICT, "Same-host top-level form GETs are strictly same-site");
+  create_test(SUBDOMAIN_ORIGIN, SUBDOMAIN_ORIGIN, SameSiteStatus.STRICT, "Subdomain top-level form GETs are strictly same-site");
+  create_test(CROSS_SITE_ORIGIN, CROSS_SITE_ORIGIN, SameSiteStatus.LAX, "Cross-site top-level form GETs are laxly same-site");
 
   // Redirect from {same-host,subdomain,cross-site} to same-host:
-  create_test(ORIGIN, redirectTo(ORIGIN, ORIGIN), "SameSite=Lax", true, "Same-host redirecting to same-host GETs to '_blank' are laxly same-site");
-  create_test(ORIGIN, redirectTo(ORIGIN, ORIGIN), "SameSite=Strict", true, "Same-host redirecting to same-host GETs to '_blank' are strictly same-site");
-  create_test(ORIGIN, redirectTo(SUBDOMAIN_ORIGIN, ORIGIN), "SameSite=Lax", true, "Subdomain redirecting to same-host GETs to '_blank' are laxly same-site");
-  create_test(ORIGIN, redirectTo(SUBDOMAIN_ORIGIN, ORIGIN), "SameSite=Strict", true, "Subdomain redirecting to same-host GETs to '_blank' are strictly same-site");
-  create_test(ORIGIN, redirectTo(CROSS_SITE_ORIGIN, ORIGIN), "SameSite=Lax", true, "Cross-site redirecting to same-host GETs to '_blank' are laxly same-site");
-  create_test(ORIGIN, redirectTo(CROSS_SITE_ORIGIN, ORIGIN), "SameSite=Strict", true, "Cross-site redirecting to same-host GETs to '_blank' are strictly same-site");
+  create_test(ORIGIN, redirectTo(ORIGIN, ORIGIN), SameSiteStatus.STRICT, "Same-host redirecting to same-host top-level form GETs are strictly same-site");
+  create_test(ORIGIN, redirectTo(SUBDOMAIN_ORIGIN, ORIGIN), SameSiteStatus.STRICT, "Subdomain redirecting to same-host top-level form GETs are strictly same-site");
+  create_test(ORIGIN, redirectTo(CROSS_SITE_ORIGIN, ORIGIN), SameSiteStatus.STRICT, "Cross-site redirecting to same-host top-level form GETs are strictly same-site");
 
-  // Redirect from {same-host,subdomain,cross-site} to subdomain:
-  create_test(SUBDOMAIN_ORIGIN, redirectTo(ORIGIN, SUBDOMAIN_ORIGIN), "SameSite=Lax", true, "Same-host redirecting to subdomain GETs to '_blank' are laxly same-site");
-  create_test(SUBDOMAIN_ORIGIN, redirectTo(ORIGIN, SUBDOMAIN_ORIGIN), "SameSite=Strict", true, "Same-host redirecting to subdomain GETs to '_blank' are strictly same-site");
-  create_test(SUBDOMAIN_ORIGIN, redirectTo(SUBDOMAIN_ORIGIN, SUBDOMAIN_ORIGIN), "SameSite=Lax", true, "Subdomain redirecting to subdomain GETs to '_blank' are laxly same-site");
-  create_test(SUBDOMAIN_ORIGIN, redirectTo(SUBDOMAIN_ORIGIN, SUBDOMAIN_ORIGIN), "SameSite=Strict", true, "Subdomain redirecting to subdomain GETs to '_blank' are strictly same-site");
-  create_test(SUBDOMAIN_ORIGIN, redirectTo(CROSS_SITE_ORIGIN, SUBDOMAIN_ORIGIN), "SameSite=Lax", true, "Cross-site redirecting to subdomain GETs to '_blank' are laxly same-site");
-  create_test(SUBDOMAIN_ORIGIN, redirectTo(CROSS_SITE_ORIGIN, SUBDOMAIN_ORIGIN), "SameSite=Strict", true, "Cross-site redirecting to subdomain GETs to '_blank' are strictly same-site");
+  // Redirect from {same-host,subdomain,cross-site} to same-host:
+  create_test(SUBDOMAIN_ORIGIN, redirectTo(ORIGIN, SUBDOMAIN_ORIGIN), SameSiteStatus.STRICT, "Same-host redirecting to subdomain top-level form GETs are strictly same-site");
+  create_test(SUBDOMAIN_ORIGIN, redirectTo(SUBDOMAIN_ORIGIN, SUBDOMAIN_ORIGIN), SameSiteStatus.STRICT, "Subdomain redirecting to subdomain top-level form GETs are strictly same-site");
+  create_test(SUBDOMAIN_ORIGIN, redirectTo(CROSS_SITE_ORIGIN, SUBDOMAIN_ORIGIN), SameSiteStatus.STRICT, "Cross-site redirecting to subdomain top-level form GETs are strictly same-site");
 
   // Redirect from {same-host,subdomain,cross-site} to cross-site:
-  create_test(CROSS_SITE_ORIGIN, redirectTo(ORIGIN, CROSS_SITE_ORIGIN), "SameSite=Lax", true, "Same-host redirecting to cross-site GETs to '_blank' are laxly same-site");
-  create_test(CROSS_SITE_ORIGIN, redirectTo(ORIGIN, CROSS_SITE_ORIGIN), "SameSite=Strict", false, "Same-host redirecting to cross-site GETs to '_blank' are not strictly same-site");
-  create_test(CROSS_SITE_ORIGIN, redirectTo(SUBDOMAIN_ORIGIN, CROSS_SITE_ORIGIN), "SameSite=Lax", true, "Subdomain redirecting to cross-site GETs to '_blank' are laxly same-site");
-  create_test(CROSS_SITE_ORIGIN, redirectTo(SUBDOMAIN_ORIGIN, CROSS_SITE_ORIGIN), "SameSite=Strict", false, "Subdomain redirecting to cross-site GETs to '_blank' are not strictly same-site");
-  create_test(CROSS_SITE_ORIGIN, redirectTo(CROSS_SITE_ORIGIN, CROSS_SITE_ORIGIN), "SameSite=Lax", true, "Cross-site redirecting to cross-site GETs to '_blank' are laxly same-site");
-  create_test(CROSS_SITE_ORIGIN, redirectTo(CROSS_SITE_ORIGIN, CROSS_SITE_ORIGIN), "SameSite=Strict", false, "Cross-site redirecting to cross-site GETs to '_blank' are not strictly same-site");
+  create_test(CROSS_SITE_ORIGIN, redirectTo(ORIGIN, CROSS_SITE_ORIGIN), SameSiteStatus.LAX, "Same-host redirecting to cross-site top-level form GETs are laxly same-site");
+  create_test(CROSS_SITE_ORIGIN, redirectTo(SUBDOMAIN_ORIGIN, CROSS_SITE_ORIGIN), SameSiteStatus.LAX, "Subdomain redirecting to cross-site top-level form GETs are laxly same-site");
+  create_test(CROSS_SITE_ORIGIN, redirectTo(CROSS_SITE_ORIGIN, CROSS_SITE_ORIGIN), SameSiteStatus.LAX, "Cross-site redirecting to cross-site top-level form GETs are laxly same-site");
 </script>

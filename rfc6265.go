@@ -18,12 +18,12 @@ func defaultHandler(w http.ResponseWriter, r *http.Request) {
 
 // Respond to `/redir` by redirecting to the URL's query.
 func redirectHandler(w http.ResponseWriter, r *http.Request) {
-  query := r.URL.RawQuery
-  if len(query) == 0 {
-    http.Error(w, "No cookie present in the URL's query.", http.StatusInternalServerError)
+  to := r.FormValue("to")
+  if len(to) == 0 {
+    http.Error(w, "No destination present in the URL's query.", http.StatusInternalServerError)
     return
   }
 
   setNoCacheAndCORSHeaders(w, r)
-  http.Redirect(w, r, query, http.StatusTemporaryRedirect);
+  http.Redirect(w, r, to, http.StatusTemporaryRedirect);
 }

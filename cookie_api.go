@@ -58,7 +58,11 @@ func imgIfCookieMatch(w http.ResponseWriter, r *http.Request) {
     return
   }
 
-  cookie, _ := r.Cookie(name)
+  cookie, err := r.Cookie(name)
+  if err != nil {
+    http.Error(w, "No cookie present with the given name.", http.StatusInternalServerError)
+    return
+  }
   if cookie.Value != value {
     http.Error(w, "The cookie's value did not match the given value.", http.StatusInternalServerError)
     return
