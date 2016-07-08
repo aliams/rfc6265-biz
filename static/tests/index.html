@@ -27,6 +27,10 @@
       text-align: center;
     }
 
+    tbody th {
+      vertical-align: top;
+    }
+
     .complete {
       background: #4A4;
       color: #FFF;
@@ -66,7 +70,7 @@
   <table>
     <thead>
       <tr>
-        <th rowspan="2">Test Suite</th>
+        <th rowspan="2" colspan="2">Test Suite</th>
         <th colspan="4">Chrome</th>
         <th rowspan="2">Firefox<br>(<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=795346">#795346</a>)</th>
         <th rowspan="2">Safari<br>(<a href="https://bugs.webkit.org/show_bug.cgi?id=159464">#159464</a>)</th>
@@ -78,6 +82,7 @@
     </thead>
     <tbody>
       <tr>
+        <th rowspan="6">Basics</th>
         <td><a href="samesite/fetch.html"><code>fetch()</code></a></td>
         <!-- Chrome -->
         <td class="partial">7/12</td>
@@ -160,6 +165,63 @@
         <td class="nada">0/12</td>
         <!-- Edge -->
         <td class="nada">0/12</td>
+      </tr>
+      <tr>
+        <th rowspan="4"><code>reload()</code></th>
+        <td><a href="samesite/form-get-blank-reload.html"><code>&lt;form method="GET" target="_blank"&gt;</code></a></td>
+        <!-- Chrome -->
+        <td class="partial">2/3</td>
+        <td class="partial">2/3</td>
+        <td class="partial">2/3</td>
+        <td class="partial">2/3</td>
+        <!-- Firefox -->
+        <td class="nada">0/3</td>
+        <!-- Safari -->
+        <td class="nada">0/3</td>
+        <!-- Edge -->
+        <td class="nada">0/3</td>
+      </tr>
+      <tr>
+        <td><a href="samesite/form-post-blank-reload.html"><code>&lt;form method="POST" target="_blank"&gt;</code></a></td>
+        <!-- Chrome -->
+        <td class="partial">2/3</td>
+        <td class="partial">2/3</td>
+        <td class="partial">2/3</td>
+        <td class="partial">2/3</td>
+        <!-- Firefox -->
+        <td class="nada">0/3</td>
+        <!-- Safari -->
+        <td class="nada">0/3</td>
+        <!-- Edge -->
+        <td class="nada">0/3</td>
+      </tr>
+      <tr>
+        <td><a href="samesite/iframe.html"><code>&lt;iframe&gt;</code></a></td>
+        <!-- Chrome -->
+        <td class="partial">2/3</td>
+        <td class="partial">2/3</td>
+        <td class="partial">2/3</td>
+        <td class="partial">2/3</td>
+        <!-- Firefox -->
+        <td class="nada">0/3</td>
+        <!-- Safari -->
+        <td class="nada">0/3</td>
+        <!-- Edge -->
+        <td class="nada">0/3</td>
+      </tr>
+      <tr>
+        <td><a href="samesite/window-open-reload.html"><code>window.open()</code></a></td>
+        <!-- Chrome -->
+        <td class="partial">2/3</td>
+        <td class="partial">2/3</td>
+        <td class="partial">2/3</td>
+        <td class="partial">2/3</td>
+        <!-- Firefox -->
+        <td class="nada">0/3</td>
+        <!-- Safari -->
+        <td class="nada">0/3</td>
+        <!-- Edge -->
+        <td class="nada">0/3</td>
       </tr>
     </tbody>
   </table>

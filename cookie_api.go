@@ -113,6 +113,12 @@ func postToParent(w http.ResponseWriter, r *http.Request) {
 
   if (window.opener)
     window.opener.postMessage(data, "*");
+
+  window.addEventListener("message", e => {
+    console.log(e);
+    if (e.data == "reload")
+      window.location.reload();
+  });
 </script>
   `
   t, err := template.New("page").Parse(tmpl)
