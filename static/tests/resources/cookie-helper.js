@@ -9,7 +9,6 @@
     CROSS_ORIGIN_HOST = "127.0.0.1";
   }
 
-
   window.ORIGIN = "http://" + HOST + PORT;
   window.WWW_ORIGIN = "http://www." + HOST + PORT;
   window.SUBDOMAIN_ORIGIN = "http://subdomain." + HOST + PORT;
@@ -22,7 +21,6 @@
   if (window.location.hostname != HOST)
     window.location.hostname = HOST;
 })();
-
 
 // A tiny helper which returns the result of fetching |url| with credentials.
 function credFetch(url) {
