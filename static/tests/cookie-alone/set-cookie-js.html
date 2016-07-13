@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<script src="/tests/resources/testharness.js"></script>
+<script src="/tests/resources/testharnessreport.js"></script>
+<script src="/tests/resources/cookie-helper.js"></script>
+<script>
+  function create_test(secure_origin, secure_cookie, cookie_expected, title) {
+    promise_test(t => {
+      if (secure_origin === true) {
+         //redirect to proper origin for test 
+      }
+      var value = "" + Math.random();
+      resetAloneCookies(value, secure_cookie);
+      verifyAloneCookieState(value, cookie_expected);
+    }, title);
+  }
+
+  // No redirect:
+  create_test(false, false, true, "non-secure origins can read and write insecure cookies");
+  create_test(true, false, true, "secure origins can read and write insecure cookies");
+  create_test(false, true, false, "non-secure origins <blink>cannot</blink> read and write secure cookies");
+  create_test(true, true, true, "secure origins can read and write secure cookies");
+</script>
