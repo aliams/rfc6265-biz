@@ -228,6 +228,46 @@
     </tbody>
   </table>
 
+  <h2>"Leave Secure Cookies Alone!"</h2>
+  <p><a href="https://tools.ietf.org/html/draft-ietf-httpbis-cookie-alone-00">draft-ietf-httpbis-cookie-alone-00</a>
+   updates <a href="https://tools.ietf.org/html/rfc6265">RFC6265</a> by removing the ability for a non-secure origin to set 
+   cookies with a 'secure' flag, and to overwrite cookies whose 'secure' flag
+   is set.  This deprecation improves the isolation between HTTP and HTTPS origins,
+   and reduces the risk of malicious interference.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th rowspan="2" colspan="2">Test Suite</th>
+        <th colspan="4">Chrome</th>
+        <th rowspan="2">Firefox<br>(<a href="#">TDB</a>)</th>
+        <th rowspan="2">Safari<br>(<a href="#">TDB</a>)</th>
+        <th rowspan="2">Edge<br>(<a href="#">TDB</a>)</th>
+      </tr>
+      <tr>
+        <th>51</th><th>52</th><th>53</th><th>54</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th rowspan="6">Setting Cookies</th>
+        <td><a href="cookie-alone/set-cookie-js.html"><code>document.cookie</code></a></td>
+        <!-- Chrome -->
+        <td class="nada">0/12</td>
+        <td class="nada">0/12</td>
+        <td class="nada">0/12</td>
+        <td class="nada">0/12</td>
+        <!-- Firefox -->
+        <td class="nada">0/12</td>
+        <!-- Safari -->
+        <td class="nada">0/12</td>
+        <!-- Edge -->
+        <td class="nada">0/12</td>
+      </tr>
+    </tbody>
+  </table>
+
+
   <footer>
     <p>Source at <a href="https://github.com/mikewest/rfc6265-biz">https://github.com/mikewest/rfc6265-biz</a>.</p>
   </footer>

@@ -14,6 +14,11 @@
   window.SUBDOMAIN_ORIGIN = "http://subdomain." + HOST + PORT;
   window.CROSS_SITE_ORIGIN = "http://" + CROSS_ORIGIN_HOST + PORT;
 
+  window.SECURE_ORIGIN = "https://" + HOST + PORT;
+  window.SECURE_WWW_ORIGIN = "https://www." + HOST + PORT;
+  window.SECURE_SUBDOMAIN_ORIGIN = "https://subdomain." + HOST + PORT;
+  window.SECURE_CROSS_SITE_ORIGIN = "https://" + CROSS_ORIGIN_HOST + PORT;
+
   // Set the global cookie name.
   window.HTTP_COOKIE = "cookie_via_http";
 
@@ -113,4 +118,65 @@ function verifySameSiteCookieState(expectedStatus, expectedValue, cookies) {
       assert_equals(cookies["samesite_strict"], expectedValue, "SameSite=Strict cookies are sent with strict requests.");
       assert_equals(cookies["samesite_lax"], expectedValue, "SameSite=Lax cookies are sent with strict requests.");
     }
+}
+
+//
+// LeaveSecureCookiesAlone-specific test helpers:
+//
+// borrowed from http://www.quirksmode.org/js/cookies.html
+function create_cookie_from_js(name, value, days, secure) {
+  if (days) {
+    var date = new Date();
+    date.setTime(date.getTime()+(days*24*60*60*1000));
+    var expires = "; expires="+date.toGMTString();
+  }
+  else var expires = "";
+  //alert("secure: " + secure); (shame on me for this)
+  if (secure == true) {
+    var secure = "secure; ";
+  }
+  else var secure = "";
+  document.cookie = name+"="+value+expires+"; "+secure+"path=/";
+}
+
+// erase cookie value and set for expiration
+function erase_cookie_from_js(name) {
+  create_cookie_from_js(name,"",-1);
+}
+
+// set cookie from js test on current |origin|. 
+function resetAloneCookies(value, secure_cookie) {
+
+  //create cookies anew for current origin
+  //CAUTION : WE CANNOT DEPEND ON JAVASCRIPT TO SET OR ERASE COOKIES FOR THIS TEST
+  //          NEED TO FETCH COOKIES FROM SERVER  erase_cookie_from_js("cookiealone");
+  erase_cookie_from_js("cookiealone");
+  assert_dom_cookie("cookiealone", value, false); //TODO more robust test to verify initial test state is good
+  assert_dom_cookie("cookiealone", "", false);
+  assert_dom_cookie("cookiealone", null, false);
+
+  //wipe old "always insecure" cookie if it exists
+  erase_cookie_from_js("cookiealone_alwaysinsecure");
+  assert_dom_cookie("cookiealone_alwaysinsecure", value, false); //TODO more robust test to verify initial test state is good
+  assert_dom_cookie("cookiealone_alwaysinsecure", "", false);
+  assert_dom_cookie("cookiealone_alwaysinsecure", null, false);
+
+  //set test cookies
+  create_cookie_from_js("cookiealone", value, 10, secure_cookie);
+  assert_dom_cookie("cookiealone", value, true);
+  create_cookie_from_js("cookiealone_alwaysinsecure", value, 10, false);
+  assert_dom_cookie("cookiealone_alwaysinsecure", value, true);
+}
+
+// Given an |expectedStatus| and |expectedValue|, assert the |cookies| contains the
+// proper set of cookie names and values.
+function verifyAloneCookieState(value, cookie_expected) {
+
+  if (cookie_expected == true) {
+    assert_dom_cookie("cookiealone", value, true);
+    assert_dom_cookie("cookiealone_alwaysinsecure", value, true);
+  } else {
+    assert_dom_cookie("cookiealone", value, false);
+    assert_dom_cookie("cookiealone_alwaysinsecure", value, false);
+  }
 }
