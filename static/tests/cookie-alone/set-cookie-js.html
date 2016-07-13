@@ -5,24 +5,31 @@
 <script>
   function create_read_test(secure_origin, secure_cookie, cookie_expected, title) {
     promise_test(t => {
-      if (secure_origin === true) {
+      var value = "" + Math.random();
+      if (secure_origin == true) {
          //redirect to proper origin for test 
       }
-      var value = "" + Math.random();
+      
+      //TODO before this test, ensure secure-origin server sends set-cookie call to erase all existing alone-cookies
+      forceEraseAllAloneCookies();
 
-      //TODO change this to "retrieve secure cookie from secure-origin
-      resetAloneCookies(value, secure_cookie);
+      //TODO change this to "retrieve secure cookie from secure-origin server directly"
+      resetAloneCookiesfromServer(value, secure_cookie);
       verifyAloneCookieState(value, cookie_expected);
     }, title);
   }
 
   function create_write_test(secure_origin, secure_cookie, cookie_expected, title) {
     promise_test(t => {
-      if (secure_origin === true) {
+      var value = "" + Math.random();
+      if (secure_origin == true) {
          //redirect to proper origin for test 
       }
-      var value = "" + Math.random();
-      resetAloneCookies(value, secure_cookie);
+
+      //TODO before this test, ensure secure-origin server sends set-cookie call to erase all existing alone-cookies
+      forceEraseAllAloneCookies();
+
+      resetAloneCookiesFromJavaScript(value, secure_cookie);
       verifyAloneCookieState(value, cookie_expected);
     }, title);
   }
@@ -32,13 +39,15 @@
   create_read_test(false, true, false, "non-secure origins using document.cookie cannot read secure cookies");
   create_write_test(false, true, false, "non-secure origins using document.cookie cannot write secure cookies");
 
-  //all UA's should pass this - tests that show non-secure origins can read and write insecure cookies
+  //all UA's should pass this test that show non-secure origins can read and write insecure cookies
   create_read_test(false, false, true, "non-secure origins using document.cookie can read insecure cookies");
   create_write_test(false, false, true, "non-secure origins using document.cookie can write insecure cookies");
 
   //tests that show secure origins can read and write both secure and insecure cookies
   create_read_test(true, false, true, "secure origins using document.cookie can read insecure cookies");
   create_write_test(true, false, true, "secure origins using document.cookie can write insecure cookies");
-  create_read_test(true, false, true, "secure origins using document.cookie can read secure cookies");
-  create_write_test(true, false, true, "secure origins using document.cookie can write secure cookies");
+
+  //these (and others?) are likely broken until we can test on a live HTTPS site
+  create_read_test(true, true, true, "secure origins using document.cookie can read secure cookies");
+  create_write_test(true, true, true, "secure origins using document.cookie can write secure cookies");
 </script>

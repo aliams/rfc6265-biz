@@ -145,11 +145,9 @@ function erase_cookie_from_js(name) {
 }
 
 // set cookie from js test on current |origin|. 
-function resetAloneCookies(value, secure_cookie) {
+function resetAloneCookiesFromJavaScript(value, secure_cookie) {
 
-  //create cookies anew for current origin
-  //CAUTION : WE CANNOT DEPEND ON JAVASCRIPT TO SET OR ERASE COOKIES FOR THIS TEST
-  //          NEED TO FETCH COOKIES FROM SERVER  erase_cookie_from_js("cookiealone");
+  //create cookies anew for current origin from JS calls
   erase_cookie_from_js("cookiealone");
   assert_dom_cookie("cookiealone", value, false); //TODO more robust test to verify initial test state is good
   assert_dom_cookie("cookiealone", "", false);
@@ -166,6 +164,34 @@ function resetAloneCookies(value, secure_cookie) {
   assert_dom_cookie("cookiealone", value, true);
   create_cookie_from_js("cookiealone_alwaysinsecure", value, 10, false);
   assert_dom_cookie("cookiealone_alwaysinsecure", value, true);
+}
+
+// set cookie by making a secure request to server reqesting response to erase all
+// alone secure-cookies at current |origin|. 
+// TODO change this to set cookie via server
+function resetAloneCookiesfromServer(value, secure_cookie) {
+
+  //create cookies anew for current origin
+  erase_cookie_from_js("cookiealone");
+  assert_dom_cookie("cookiealone", value, false); //TODO more robust test to verify initial test state is good
+  assert_dom_cookie("cookiealone", "", false);
+  assert_dom_cookie("cookiealone", null, false);
+
+  //wipe old "always insecure" cookie if it exists
+  erase_cookie_from_js("cookiealone_alwaysinsecure");
+  assert_dom_cookie("cookiealone_alwaysinsecure", value, false); //TODO more robust test to verify initial test state is good
+  assert_dom_cookie("cookiealone_alwaysinsecure", "", false);
+  assert_dom_cookie("cookiealone_alwaysinsecure", null, false);
+
+  //set test cookies
+  create_cookie_from_js("cookiealone", value, 10, secure_cookie);
+  assert_dom_cookie("cookiealone", value, true);
+  create_cookie_from_js("cookiealone_alwaysinsecure", value, 10, false);
+  assert_dom_cookie("cookiealone_alwaysinsecure", value, true);
+}
+
+//TODO request response from secure-origin to 
+function forceEraseAllAloneCookies() {
 }
 
 // Given an |expectedStatus| and |expectedValue|, assert the |cookies| contains the
