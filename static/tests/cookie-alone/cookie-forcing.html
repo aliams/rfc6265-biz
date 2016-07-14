@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<script src="/tests/resources/testharness.js"></script>
+<script src="/tests/resources/testharnessreport.js"></script>
+<script src="/tests/resources/cookie-helper.js"></script>
+<script>
+  function ccookie_force_test(secure_cookie, cookie_expected, title) {
+    var counter = 0;
+    promise_test(t => {
+
+      var testCookieValue = "" + Math.random();
+      var markerCookieName = "marker";
+      var markerCookieValue = "markerVal";
+
+      var brakes = 5000; //limit cookie setting limit in case browers are magic
+    
+      // Set an initial cookie as a marker
+      create_cookie_from_js(markerCookieName, markerCookieValue, 10, false);
+      assert_dom_cookie(markerCookieName, markerCookieValue, true);
+
+      // Set new cookies until marker is gone
+      try {
+        for (i = 0; i < brakes; i++) { 
+          create_cookie_from_js(markerCookieName + counter++, markerCookieValue, 10, false);
+          assert_dom_cookie(markerCookieName, markerCookieValue, true);
+        }
+      } catch(err) {
+        //shame on me, just fiddling for now
+      }
+
+      assert_dom_cookie(markerCookieName, markerCookieValue, false);
+      alert("It took " + counter + " cookies to force out the marker cookie");
+      
+      //TODO before this test, ensure secure-origin server sends set-cookie call to erase all existing alone-cookies
+      //forceEraseAllAloneCookies();
+
+      //TODO change this to "retrieve secure cookie from secure-origin server directly"
+      //resetAloneCookiesfromServer(testCookieValue, secure_cookie);
+      //verifyAloneCookieState(testCookieValue, cookie_expected);
+    }, title);
+  }
+
+
+  //actual tests to verify that non-secure origins should "leave secure cookies alone"
+  ccookie_force_test(false, false, "non-secure origins should be able to force out insecure cookies.");
+
+</script>
