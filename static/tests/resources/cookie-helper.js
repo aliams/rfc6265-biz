@@ -192,6 +192,7 @@ function resetAloneCookiesfromServer(value, secure_cookie) {
 
 //TODO request response from secure-origin to 
 function forceEraseAllAloneCookies() {
+  //TODO
 }
 
 // Given an |expectedStatus| and |expectedValue|, assert the |cookies| contains the
