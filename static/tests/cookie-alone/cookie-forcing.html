@@ -3,7 +3,7 @@
 <script src="/tests/resources/testharnessreport.js"></script>
 <script src="/tests/resources/cookie-helper.js"></script>
 <script>
-  function ccookie_force_test(secure_cookie, cookie_expected, title) {
+  function cookie_force_test(secure_origin, secure_cookie, present, title) {
     var counter = 0;
     promise_test(t => {
 
@@ -14,33 +14,33 @@
       var brakes = 5000; //limit cookie setting limit in case browers are magic
     
       // Set an initial cookie as a marker
-      create_cookie_from_js(markerCookieName, markerCookieValue, 10, false);
+      create_cookie_from_js(markerCookieName, markerCookieValue, 10, secure_cookie);
+      //TODO we cant trust document.cookie to set secure cookies. Need a round trip to a secure origin.
       assert_dom_cookie(markerCookieName, markerCookieValue, true);
 
       // Set new cookies until marker is gone
       try {
         for (i = 0; i < brakes; i++) { 
-          create_cookie_from_js(markerCookieName + counter++, markerCookieValue, 10, false);
+          create_cookie_from_js(markerCookieName + counter++, markerCookieValue, 10, secure_cookie);
           assert_dom_cookie(markerCookieName, markerCookieValue, true);
         }
       } catch(err) {
         //shame on me, just fiddling for now
       }
 
-      assert_dom_cookie(markerCookieName, markerCookieValue, false);
-      alert("It took " + counter + " cookies to force out the marker cookie");
-      
-      //TODO before this test, ensure secure-origin server sends set-cookie call to erase all existing alone-cookies
-      //forceEraseAllAloneCookies();
+      assert_dom_cookie(markerCookieName, markerCookieValue, present);
 
-      //TODO change this to "retrieve secure cookie from secure-origin server directly"
-      //resetAloneCookiesfromServer(testCookieValue, secure_cookie);
-      //verifyAloneCookieState(testCookieValue, cookie_expected);
+      if (present == false) {
+        alert("It took " + counter + " cookies to force out the marker cookie");
+      } else {
+        alert("Even after " + counter + " cookies the marker cookie was not forced out. Try incresing the current limit of " + brakes);
+      }
+
     }, title);
   }
 
 
   //actual tests to verify that non-secure origins should "leave secure cookies alone"
-  ccookie_force_test(false, false, "non-secure origins should be able to force out insecure cookies.");
+  cookie_force_test(false, false, false, "non-secure origins should be able to force out insecure cookies.");
 
 </script>

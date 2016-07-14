@@ -14,11 +14,6 @@
   window.SUBDOMAIN_ORIGIN = "http://subdomain." + HOST + PORT;
   window.CROSS_SITE_ORIGIN = "http://" + CROSS_ORIGIN_HOST + PORT;
 
-  window.SECURE_ORIGIN = "https://" + HOST + PORT;
-  window.SECURE_WWW_ORIGIN = "https://www." + HOST + PORT;
-  window.SECURE_SUBDOMAIN_ORIGIN = "https://subdomain." + HOST + PORT;
-  window.SECURE_CROSS_SITE_ORIGIN = "https://" + CROSS_ORIGIN_HOST + PORT;
-
   // Set the global cookie name.
   window.HTTP_COOKIE = "cookie_via_http";
 
