@@ -242,11 +242,11 @@
   <table>
     <thead>
       <tr>
-        <th rowspan="2" colspan="2">Test Suite</th>
+        <th rowspan="2">Test Suite</th>
         <th colspan="4">Chrome</th>
-        <th rowspan="2">Firefox<br>(<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=795346">#795346</a>)</th>
-        <th rowspan="2">Safari<br>(<a href="https://bugs.webkit.org/show_bug.cgi?id=159464">#159464</a>)</th>
-        <th rowspan="2">Edge<br>(<a href="https://github.com/MicrosoftEdge/Status/issues/201">#201</a>)</th>
+        <th rowspan="2">Firefox<br>(<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=976073">#976073</a>)</th>
+        <th rowspan="2">Safari<br>(<a href="#">#TBD</a>)</th>
+        <th rowspan="2">Edge<br>(<a href="#">#TBD</a>)</th>
       </tr>
       <tr>
         <th>51</th><th>52</th><th>53</th><th>54</th>
@@ -254,8 +254,7 @@
     </thead>
     <tbody>
       <tr>
-        <th rowspan="6">Basics</th>
-        <td><a href="cookie-alone/set-cookie-js.html"><code>document.cookie</code></a></td>
+        <td><a href="cookie-alone/create-cookie-js.html">Create secure cookie from non-secure origin via JS</a></td>
         <!-- Chrome -->
         <td class="nada">0/?</td>
         <td class="nada">0/?</td>
@@ -269,7 +268,63 @@
         <td class="nada">0/?</td>
       </tr>
       <tr>
-        <td><a href="cookie-alone/cookie-forcing.html">cookie forcing</a></td>
+        <td><a href="cookie-alone/edit-cookie-js.html">Edit existing secure cookie from non-secure origin via JS</a></td>
+        <!-- Chrome -->
+        <td class="nada">0/?</td>
+        <td class="nada">0/?</td>
+        <td class="nada">0/?</td>
+        <td class="nada">0/?</td>
+        <!-- Firefox -->
+        <td class="nada">0/?</td>
+        <!-- Safari -->
+        <td class="nada">0/?</td>
+        <!-- Edge -->
+        <td class="nada">0//</td>
+      </tr>
+      <tr>
+        <td><a href="cookie-alone/read-cookie-js.html">Read secure cookie from non-secure origin via JS</a></td>
+        <!-- Chrome -->
+        <td class="nada">0/?</td>
+        <td class="nada">0/?</td>
+        <td class="nada">0/?</td>
+        <td class="nada">0/?</td>
+        <!-- Firefox -->
+        <td class="nada">0/?</td>
+        <!-- Safari -->
+        <td class="nada">0/?</td>
+        <!-- Edge -->
+        <td class="nada">0//</td>
+      </tr>
+      <tr>
+        <td><a href="#">Write new secure cookie from non-secure origin via set-cookie</a></td>
+        <!-- Chrome -->
+        <td class="nada">0/?</td>
+        <td class="nada">0/?</td>
+        <td class="nada">0/?</td>
+        <td class="nada">0/?</td>
+        <!-- Firefox -->
+        <td class="nada">0/?</td>
+        <!-- Safari -->
+        <td class="nada">0/?</td>
+        <!-- Edge -->
+        <td class="nada">0//</td>
+      </tr>
+      <tr>
+        <td><a href="#">Edit existing secure cookie from non-secure origin via set-cookie</a></td>
+        <!-- Chrome -->
+        <td class="nada">0/?</td>
+        <td class="nada">0/?</td>
+        <td class="nada">0/?</td>
+        <td class="nada">0/?</td>
+        <!-- Firefox -->
+        <td class="nada">0/?</td>
+        <!-- Safari -->
+        <td class="nada">0/?</td>
+        <!-- Edge -->
+        <td class="nada">0//</td>
+      </tr>
+      <tr>
+        <td><a href="cookie-alone/cookie-forcing.html">Delete secure cookie from non-secure origin via overflowing the cookie jar</a></td>
         <!-- Chrome -->
         <td class="nada">0/?</td>
         <td class="nada">0/?</td>
@@ -284,7 +339,6 @@
       </tr>
     </tbody>
   </table>
-
 
   <footer>
     <p>Source at <a href="https://github.com/mikewest/rfc6265-biz">https://github.com/mikewest/rfc6265-biz</a>.</p>

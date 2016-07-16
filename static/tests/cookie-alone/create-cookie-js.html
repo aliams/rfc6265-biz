@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<script src="/tests/resources/testharness.js"></script>
+<script src="/tests/resources/testharnessreport.js"></script>
+<script src="/tests/resources/cookie-helper.js"></script>
+<script>
+ function create_secure_cookie_test(secure_origin, secure_cookie, cookie_expected, title) {
+    promise_test(t => {
+    	
+      //TODO redirect to proper origin for test 
+      //if (secure_origin == true) {} 
+
+      var value = "" + Math.random();
+      createAloneCookieFromJavaScript(value, secure_cookie, cookie_expected);
+    }, title);
+  }
+
+  //verify that non-secure origins should not be able to create secure cookies from JS
+  create_secure_cookie_test(false, true, false, "non-secure origins using document.cookie cannot create secure cookies");
+
+  //verify that non-secure origins can create insecure cookies from JS
+  create_secure_cookie_test(false, false, true, "non-secure origins using document.cookie can create insecure cookies");
+
+  //verify that secure origins can create insecure cookies from JS
+  create_secure_cookie_test(true, false, true, "secure origins using document.cookie can create insecure cookies");
+
+  //verify that secure origins can create secure cookies from JS
+  create_secure_cookie_test(true, true, true, "secure origins using document.cookie can create secure cookies");
+</script>

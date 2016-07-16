@@ -9,6 +9,7 @@
     CROSS_ORIGIN_HOST = "127.0.0.1";
   }
 
+  window.SECURE_ORIGIN = "https://" + HOST + PORT;
   window.ORIGIN = "http://" + HOST + PORT;
   window.WWW_ORIGIN = "http://www." + HOST + PORT;
   window.SUBDOMAIN_ORIGIN = "http://subdomain." + HOST + PORT;
@@ -47,6 +48,7 @@ function assert_cookie(origin, obj, name, value, present) {
 // If |origin| matches `document.origin`, also assert (via `document.cookie`) that
 // the cookie was correctly removed and reset.
 function create_cookie(origin, name, value, extras) {
+  alert("Create_cookie: " + origin + "/cookie/drop?name=" + name);	
   return credFetch(origin + "/cookie/drop?name=" + name)
     .then(_ => {
       if (origin == document.origin)
@@ -118,19 +120,20 @@ function verifySameSiteCookieState(expectedStatus, expectedValue, cookies) {
 //
 // LeaveSecureCookiesAlone-specific test helpers:
 //
+
 // borrowed from http://www.quirksmode.org/js/cookies.html
-function create_cookie_from_js(name, value, days, secure) {
+function create_cookie_from_js(name, value, days, secure_flag) {
   if (days) {
     var date = new Date();
     date.setTime(date.getTime()+(days*24*60*60*1000));
     var expires = "; expires="+date.toGMTString();
   }
   else var expires = "";
-  //alert("secure: " + secure); (shame on me for this)
-  if (secure == true) {
-    var secure = "secure; ";
+  
+  var secure = "";
+  if (secure_flag == true) {
+    secure = "secure; ";
   }
-  else var secure = "";
   document.cookie = name+"="+value+expires+"; "+secure+"path=/";
 }
 
@@ -139,66 +142,53 @@ function erase_cookie_from_js(name) {
   create_cookie_from_js(name,"",-1);
 }
 
-// set cookie from js test on current |origin|. 
-function resetAloneCookiesFromJavaScript(value, secure_cookie) {
+// verify if cookie can be created from js
+function createAloneCookieFromJavaScript(value, secure_cookie, cookie_expected) {
 
-  //create cookies anew for current origin from JS calls
-  erase_cookie_from_js("cookiealone");
-  assert_dom_cookie("cookiealone", value, false); //TODO more robust test to verify initial test state is good
-  assert_dom_cookie("cookiealone", "", false);
-  assert_dom_cookie("cookiealone", null, false);
+  //force secure cookie to be deleted via HTTPS set=cookie
+  credFetch(window.SECURE_ORIGIN + "/cookie/drop?name=cookiealone");
 
-  //wipe old "always insecure" cookie if it exists
-  erase_cookie_from_js("cookiealone_alwaysinsecure");
-  assert_dom_cookie("cookiealone_alwaysinsecure", value, false); //TODO more robust test to verify initial test state is good
-  assert_dom_cookie("cookiealone_alwaysinsecure", "", false);
-  assert_dom_cookie("cookiealone_alwaysinsecure", null, false);
-
-  //set test cookies
+  //set test cookie
   create_cookie_from_js("cookiealone", value, 10, secure_cookie);
-  assert_dom_cookie("cookiealone", value, true);
-  create_cookie_from_js("cookiealone_alwaysinsecure", value, 10, false);
-  assert_dom_cookie("cookiealone_alwaysinsecure", value, true);
+  
+  //TODO: we have no way to reliably test in JS if secure cookie is present
+  //so we need to send the cookie back to the server for verification
+  assert_dom_cookie("cookiealone", value, cookie_expected);
 }
 
-// set cookie by making a secure request to server reqesting response to erase all
-// alone secure-cookies at current |origin|. 
-// TODO change this to set cookie via server
-function resetAloneCookiesfromServer(value, secure_cookie) {
-
-  //create cookies anew for current origin
-  erase_cookie_from_js("cookiealone");
-  assert_dom_cookie("cookiealone", value, false); //TODO more robust test to verify initial test state is good
-  assert_dom_cookie("cookiealone", "", false);
-  assert_dom_cookie("cookiealone", null, false);
-
-  //wipe old "always insecure" cookie if it exists
-  erase_cookie_from_js("cookiealone_alwaysinsecure");
-  assert_dom_cookie("cookiealone_alwaysinsecure", value, false); //TODO more robust test to verify initial test state is good
-  assert_dom_cookie("cookiealone_alwaysinsecure", "", false);
-  assert_dom_cookie("cookiealone_alwaysinsecure", null, false);
-
-  //set test cookies
-  create_cookie_from_js("cookiealone", value, 10, secure_cookie);
-  assert_dom_cookie("cookiealone", value, true);
-  create_cookie_from_js("cookiealone_alwaysinsecure", value, 10, false);
-  assert_dom_cookie("cookiealone_alwaysinsecure", value, true);
-}
-
-//TODO request response from secure-origin to 
-function forceEraseAllAloneCookies() {
-  //TODO
-}
-
-// Given an |expectedStatus| and |expectedValue|, assert the |cookies| contains the
-// proper set of cookie names and values.
-function verifyAloneCookieState(value, cookie_expected) {
-
-  if (cookie_expected == true) {
-    assert_dom_cookie("cookiealone", value, true);
-    assert_dom_cookie("cookiealone_alwaysinsecure", value, true);
+//verify if cookie can be edited from js
+function editAloneCookieFromJavaScript(value, secure_cookie, cookie_change_expected) {
+	
+  //force secure cookie to be deleted and created via HTTPS set=cookie
+  if (secure_cookie == true) {
+      create_cookie(window.SECURE_ORIGIN, "cookiealone", value, "secure;");
   } else {
-    assert_dom_cookie("cookiealone", value, false);
-    assert_dom_cookie("cookiealone_alwaysinsecure", value, false);
+	  create_cookie(window.ORIGIN, "cookiealone", value, "");   
   }
+  
+  //overwrite secure cookie with new value
+  create_cookie_from_js("cookiealone", value+"different", 10, secure_cookie);
+  
+  //TODO: we have no way to reliably test in JS if secure cookie is present
+  //so we need to send the cookie back to the server for verification
+  assert_dom_cookie("cookiealone", value+"different", cookie_change_expected);
+}
+
+//verify if cookie can be read from js
+function readAloneCookieFromJavaScript(value, secure_cookie, cookie_read_expected) {
+  alert("value2: " + value);
+  //force secure cookie to be deleted and created via HTTP set=cookie
+  if (secure_cookie == true) {
+      create_cookie(window.SECURE_ORIGIN, "cookiealone", value, "secure; ");
+  } else {
+	  alert("before: " + document.cookie);
+	  create_cookie(window.ORIGIN, "cookiealone", value, "");   
+	  alert("after: " + document.cookie);
+
+  }
+  
+  //TODO: we have no way to reliably test in JS if secure cookie is present
+  //so we need to send the cookie back to the server for verification
+  alert(document.cookie + "-:-" + value + ":"+cookie_read_expected);
+  assert_dom_cookie("cookiealone", value, cookie_read_expected);
 }

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<script src="/tests/resources/testharness.js"></script>
+<script src="/tests/resources/testharnessreport.js"></script>
+<script src="/tests/resources/cookie-helper.js"></script>
+<script>
+ function read_secure_cookie_test(secure_origin, secure_cookie, cookie_expected, title) {
+    promise_test(t => {
+    	
+      //TODO redirect to proper origin for test 
+      //if (secure_origin == true) {} 
+
+      var value = "" + Math.random();
+      readAloneCookieFromJavaScript(value, secure_cookie, cookie_expected);
+    }, title);
+  }
+
+  //verify that non-secure origins should not be able to create read cookies from JS
+  read_secure_cookie_test(false, true, false, "non-secure origins using document.cookie cannot read secure cookies");
+
+  //verify that non-secure origins can read insecure cookies from JS
+  read_secure_cookie_test(false, false, true, "non-secure origins using document.cookie can read insecure cookies");
+
+  //verify that secure origins can read insecure cookies from JS
+  read_secure_cookie_test(true, false, true, "secure origins using document.cookie can read insecure cookies");
+
+  //verify that secure origins can read secure cookies from JS
+  read_secure_cookie_test(true, true, true, "secure origins using document.cookie can read secure cookies");
+</script>
