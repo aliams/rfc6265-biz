@@ -9,7 +9,11 @@
     CROSS_ORIGIN_HOST = "127.0.0.1";
   }
 
+  //For secure cookie verification
   window.SECURE_ORIGIN = "https://" + HOST + PORT;
+  window.INSECURE_ORIGIN = "http://" + HOST + PORT;
+  
+  //standard references
   window.ORIGIN = "http://" + HOST + PORT;
   window.WWW_ORIGIN = "http://www." + HOST + PORT;
   window.SUBDOMAIN_ORIGIN = "http://subdomain." + HOST + PORT;
@@ -121,6 +125,44 @@ function verifySameSiteCookieState(expectedStatus, expectedValue, cookies) {
 // LeaveSecureCookiesAlone-specific test helpers:
 //
 
+window.SecureStatus = {
+	COOKIE: "yes",
+    NOCOOKIE: "no",
+};
+
+//Reset SameSite test cookies on |origin|. If |origin| matches `document.origin`, assert
+//(via `document.cookie`) that they were properly removed and reset.
+function resetSecureCookies(origin, value) {
+return credFetch(origin + "/cookie/drop/secure")
+ .then(_ => {
+   if (origin == document.origin) {
+     assert_dom_cookie("alone_secure", value, false);
+     assert_dom_cookie("alone_insecure", value, false);
+   }
+ })
+ .then(_ => {
+   //Not working until we can test on secure origin
+   return credFetch(origin + "/cookie/set/secure?" + value)
+     .then(_ => {
+       if (origin == document.origin) {
+         assert_dom_cookie("alone_secure", value, true);
+       }
+     })
+ })
+ .then(_ => {
+   return credFetch(origin + "/cookie/set/insecure?" + value)
+     .then(_ => {
+       if (origin == document.origin) {
+         assert_dom_cookie("alone_insecure", value, true);
+       }
+     })
+ })
+}
+
+//
+// DOM based cookie manipulation API's
+//
+
 // borrowed from http://www.quirksmode.org/js/cookies.html
 function create_cookie_from_js(name, value, days, secure_flag) {
   if (days) {
@@ -144,9 +186,6 @@ function erase_cookie_from_js(name) {
 
 // verify if cookie can be created from js
 function createAloneCookieFromJavaScript(value, secure_cookie, cookie_expected) {
-
-  //force secure cookie to be deleted via HTTPS set=cookie
-  credFetch(window.SECURE_ORIGIN + "/cookie/drop?name=cookiealone");
 
   //set test cookie
   create_cookie_from_js("cookiealone", value, 10, secure_cookie);

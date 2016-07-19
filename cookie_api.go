@@ -19,6 +19,11 @@ func init() {
   // SameSite test helpers:
   http.HandleFunc("/cookie/drop/samesite", dropSameSiteTestCookies)
   http.HandleFunc("/cookie/set/samesite", setSameSiteTestCookies)
+  
+  // SameSite test helpers:
+  http.HandleFunc("/cookie/drop/secure", dropSecureTestCookies)
+  http.HandleFunc("/cookie/set/secure", setSecureTestCookie)
+  http.HandleFunc("/cookie/set/insecure", setInsecureTestCookie)
 }
 
 // Set wide-open CORS and no-cache headers on |w|, given |r|'s `Origin` header.
@@ -180,5 +185,52 @@ func setSameSiteTestCookies(w http.ResponseWriter, r *http.Request) {
   w.Header().Add("Set-Cookie", fmt.Sprintf("samesite_lax=%s;SameSite=Lax;path=/", value))
   w.Header().Add("Set-Cookie", fmt.Sprintf("samesite_invalid=%s;SameSite=Invalid;path=/", value))
   w.Header().Add("Set-Cookie", fmt.Sprintf("samesite_none=%s;path=/", value))
+  fmt.Fprint(w, "{\"success\": true}")
+}
+
+//
+// Secure cookie test helpers:
+//
+
+// Respond to `/cookie/drop/secure` by dropping the two cookie set
+// by `setSecureTestCookies()`
+func dropSecureTestCookies(w http.ResponseWriter, r *http.Request) {
+  // Expire the named cookie, and return a JSON-encoded success code.
+  setNoCacheAndCORSHeaders(w, r)
+  w.Header().Set("Content-Type", "application/json; charset=utf-8")
+  http.SetCookie(w, &http.Cookie{Name: "alone_secure", Value: "_", MaxAge: -1})
+  http.SetCookie(w, &http.Cookie{Name: "alone_insecure", Value: "_", MaxAge: -1})
+  fmt.Fprint(w, "{\"success\": true}")
+}
+
+// Respond to `/cookie/set/secure?{value}` by setting one cookie:
+//
+//  `alone_secure={value};secure;path=/`
+func setSecureTestCookie(w http.ResponseWriter, r *http.Request) {
+  value := r.URL.RawQuery
+  if len(value) == 0 {
+    http.Error(w, "{\"success\": false, \"reason\": \"No value present in the URL's query\"}", http.StatusInternalServerError)
+    return
+  }
+
+  setNoCacheAndCORSHeaders(w, r)
+  w.Header().Set("Content-Type", "application/json; charset=utf-8")
+  w.Header().Add("Set-Cookie", fmt.Sprintf("alone_secure=%s;secure;path=/", value))
+  fmt.Fprint(w, "{\"success\": true}")
+}
+
+// Respond to `/cookie/set/insecure?{value}` by setting one cookie:
+//
+//  `alone_secure={value};path=/`
+func setInsecureTestCookie(w http.ResponseWriter, r *http.Request) {
+  value := r.URL.RawQuery
+  if len(value) == 0 {
+    http.Error(w, "{\"success\": false, \"reason\": \"No value present in the URL's query\"}", http.StatusInternalServerError)
+    return
+  }
+
+  setNoCacheAndCORSHeaders(w, r)
+  w.Header().Set("Content-Type", "application/json; charset=utf-8")
+  w.Header().Add("Set-Cookie", fmt.Sprintf("alone_insecure=%s;path=/", value))
   fmt.Fprint(w, "{\"success\": true}")
 }
