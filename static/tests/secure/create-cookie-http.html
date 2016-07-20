@@ -20,7 +20,7 @@
   //Given an |expectedStatus| and |expectedValue|, assert the |cookies| contains the
   //proper set of cookie names and values.
   function verifySecureCookieState(expectedStatus, expectedValue, cookies) {
-    assert_equals(cookies["alone_insecure"], expectedValue, "Insecure cookies are always present");
+    //assert_equals(cookies["alone_insecure"], expectedValue, "Insecure cookies are always present");
     if (expectedStatus == SecureStatus.INSECURE_COOKIE_ONLY) {
     	assert_equals(cookies["alone_secure"], undefined, "Secure cookies are not present");
     } else if (expectedStatus == SecureStatus.BOTH_COOKIES) {
@@ -30,9 +30,6 @@
   
   //cookies set by insecure origins
   create_test(INSECURE_ORIGIN, INSECURE_ORIGIN, SecureStatus.INSECURE_COOKIE_ONLY, "Secure cookies cannot be set by insecure origins");
-  //create_test(INSECURE_ORIGIN, SECURE_ORIGIN, SecureStatus.INSECURE_COOKIE_ONLY, "Secure cookies cannot be set by insecure origins, even if read from a secure origin");
-  
-  //This test should set the secure cookie right but not be able to read it from the secure origin
-  //create_test(SECURE_ORIGIN, INSECURE_ORIGIN, SecureStatus.INSECURE_COOKIE_ONLY, "Secure cookies should not be read by insecure origins");
-  //create_test(SECURE_ORIGIN, SECURE_ORIGIN, SecureStatus.BOTH_COOKIES, "Secure cookies should be set and read by secure domains")
+  create_test(SECURE_CROSS_SITE_ORIGIN, INSECURE_CROSS_SITE_ORIGIN, SecureStatus.INSECURE_COOKIE_ONLY, "Secure cookies should not be read by insecure origins");
+  create_test(SECURE_CROSS_SITE_ORIGIN, SECURE_CROSS_SITE_ORIGIN, SecureStatus.BOTH_COOKIES, "Secure cookies should be set and read by secure origins")
 </script>

@@ -13,17 +13,18 @@
     SECURE_CROSS_ORIGIN_HOST = "rfc6265biz.appspot.com"; // TODO(mkwst)
   }
 
-  //For secure cookie verification
-  window.SECURE_ORIGIN = "https://" + HOST + SECURE_PORT;
-  window.INSECURE_ORIGIN = "http://" + HOST + PORT;
-  
   //standard references
   window.ORIGIN = "http://" + HOST + PORT;
+  window.SECURE_ORIGIN = "https://" + HOST + SECURE_PORT;
   window.WWW_ORIGIN = "http://www." + HOST + PORT;
   window.SUBDOMAIN_ORIGIN = "http://subdomain." + HOST + PORT;
   window.CROSS_SITE_ORIGIN = "http://" + CROSS_ORIGIN_HOST + PORT;
   window.SECURE_CROSS_SITE_ORIGIN = "https://" + SECURE_CROSS_ORIGIN_HOST + SECURE_PORT;
   window.CROSS_SITE_HOST = SECURE_CROSS_ORIGIN_HOST;
+  
+  //redundant names for clarity
+  window.INSECURE_ORIGIN = window.ORIGIN;
+  window.INSECURE_CROSS_SITE_ORIGIN = window.CROSS_SITE_ORIGIN;
 
   // Set the global cookie name.
   window.HTTP_COOKIE = "cookie_via_http";
