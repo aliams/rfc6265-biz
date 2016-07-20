@@ -187,21 +187,7 @@ return credFetch(origin + "/cookie/drop/secure")
    }
  })
  .then(_ => {
-   //Not working until we can test on secure origin
-   return credFetch(origin + "/cookie/set/secure?" + value)
-     .then(_ => {
-       if (origin == document.origin) {
-         assert_dom_cookie("alone_secure", value, true);
-       }
-     })
- })
- .then(_ => {
-   return credFetch(origin + "/cookie/set/insecure?" + value)
-     .then(_ => {
-       if (origin == document.origin) {
-         assert_dom_cookie("alone_insecure", value, true);
-       }
-     })
+     return credFetch(origin + "/cookie/set/secure?" + value)
  })
 }
 
@@ -229,52 +215,4 @@ function create_cookie_from_js(name, value, days, secure_flag) {
 function erase_cookie_from_js(name) {
   create_cookie_from_js(name,"",-1);
   assert_dom_cookie(name, "", false);
-}
-
-// verify if cookie can be created from js
-function createAloneCookieFromJavaScript(value, secure_cookie, cookie_expected) {
-
-  //set test cookie
-  create_cookie_from_js("cookiealone", value, 10, secure_cookie);
-  
-  //TODO: we have no way to reliably test in JS if secure cookie is present
-  //so we need to send the cookie back to the server for verification
-  assert_dom_cookie("cookiealone", value, cookie_expected);
-}
-
-//verify if cookie can be edited from js
-function editAloneCookieFromJavaScript(value, secure_cookie, cookie_change_expected) {
-	
-  //force secure cookie to be deleted and created via HTTPS set=cookie
-  if (secure_cookie == true) {
-      create_cookie(window.SECURE_ORIGIN, "cookiealone", value, "secure;");
-  } else {
-	  create_cookie(window.ORIGIN, "cookiealone", value, "");   
-  }
-  
-  //overwrite secure cookie with new value
-  create_cookie_from_js("cookiealone", value+"different", 10, secure_cookie);
-  
-  //TODO: we have no way to reliably test in JS if secure cookie is present
-  //so we need to send the cookie back to the server for verification
-  assert_dom_cookie("cookiealone", value+"different", cookie_change_expected);
-}
-
-//verify if cookie can be read from js
-function readAloneCookieFromJavaScript(value, secure_cookie, cookie_read_expected) {
-  alert("value2: " + value);
-  //force secure cookie to be deleted and created via HTTP set=cookie
-  if (secure_cookie == true) {
-      create_cookie(window.SECURE_ORIGIN, "cookiealone", value, "secure; ");
-  } else {
-	  alert("before: " + document.cookie);
-	  create_cookie(window.ORIGIN, "cookiealone", value, "");   
-	  alert("after: " + document.cookie);
-
-  }
-  
-  //TODO: we have no way to reliably test in JS if secure cookie is present
-  //so we need to send the cookie back to the server for verification
-  alert(document.cookie + "-:-" + value + ":"+cookie_read_expected);
-  assert_dom_cookie("cookiealone", value, cookie_read_expected);
 }

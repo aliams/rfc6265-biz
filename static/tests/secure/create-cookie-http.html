@@ -30,9 +30,9 @@
   
   //cookies set by insecure origins
   create_test(INSECURE_ORIGIN, INSECURE_ORIGIN, SecureStatus.INSECURE_COOKIE_ONLY, "Secure cookies cannot be set by insecure origins");
-  create_test(INSECURE_ORIGIN, SECURE_ORIGIN, SecureStatus.INSECURE_COOKIE_ONLY, "Secure cookies cannot be set by insecure origins, even if read from a secure origin");
+  //create_test(INSECURE_ORIGIN, SECURE_ORIGIN, SecureStatus.INSECURE_COOKIE_ONLY, "Secure cookies cannot be set by insecure origins, even if read from a secure origin");
   
   //This test should set the secure cookie right but not be able to read it from the secure origin
-  create_test(SECURE_ORIGIN, INSECURE_ORIGIN, SecureStatus.INSECURE_COOKIE_ONLY, "Secure cookies should not be read by insecure origins");
-  create_test(SECURE_ORIGIN, SECURE_ORIGIN, SecureStatus.BOTH_COOKIES, "Secure cookies should be set and read by secure domains")
+  //create_test(SECURE_ORIGIN, INSECURE_ORIGIN, SecureStatus.INSECURE_COOKIE_ONLY, "Secure cookies should not be read by insecure origins");
+  //create_test(SECURE_ORIGIN, SECURE_ORIGIN, SecureStatus.BOTH_COOKIES, "Secure cookies should be set and read by secure domains")
 </script>
