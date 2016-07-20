@@ -1,16 +1,20 @@
 // Set up exciting global variables for cookie tests.
 (_ => {
   var HOST = "rfc6265.biz";
+  var SECURE_PORT = "";
   var PORT = "";
   var CROSS_ORIGIN_HOST = "rfc6265biz.appspot.com";
+  var SECURE_CROSS_ORIGIN_HOST = "rfc6265biz.appspot.com";
   if (window.location.hostname.match(/rfc6265.test$/)) {
-    PORT = ":8080"
+    SECURE_PORT = ""; // TODO(mkwst)
+    PORT = ":8080";
     HOST = "rfc6265.test";
     CROSS_ORIGIN_HOST = "127.0.0.1";
+    SECURE_CROSS_ORIGIN_HOST = "rfc6265biz.appspot.com"; // TODO(mkwst)
   }
 
   //For secure cookie verification
-  window.SECURE_ORIGIN = "https://" + HOST + PORT;
+  window.SECURE_ORIGIN = "https://" + HOST + SECURE_PORT;
   window.INSECURE_ORIGIN = "http://" + HOST + PORT;
   
   //standard references
@@ -18,6 +22,8 @@
   window.WWW_ORIGIN = "http://www." + HOST + PORT;
   window.SUBDOMAIN_ORIGIN = "http://subdomain." + HOST + PORT;
   window.CROSS_SITE_ORIGIN = "http://" + CROSS_ORIGIN_HOST + PORT;
+  window.SECURE_CROSS_SITE_ORIGIN = "https://" + SECURE_CROSS_ORIGIN_HOST + SECURE_PORT;
+  window.CROSS_SITE_HOST = SECURE_CROSS_ORIGIN_HOST;
 
   // Set the global cookie name.
   window.HTTP_COOKIE = "cookie_via_http";
@@ -65,6 +71,46 @@ function create_cookie(origin, name, value, extras) {
             assert_dom_cookie(name, value, true);
         });
     });
+}
+
+//
+// Prefix-specific test helpers
+//
+function set_prefixed_cookie_via_dom_test(options) {
+  promise_test(t => {
+    var name = options.prefix + "prefixtestcookie";
+    erase_cookie_from_js(name);
+    var value = "" + Math.random();
+    document.cookie = name + "=" + value + ";" + options.params;
+  
+    assert_dom_cookie(name, value, options.shouldExistInDOM);
+
+    return credFetch("/cookie/list")
+      .then(r => r.json())
+      .then(cookies => assert_equals(cookies[name], options.shouldExistViaHTTP ? value : undefined));
+  }, options.title);
+}
+
+function set_prefixed_cookie_via_http_test(options) {
+  promise_test(t => {
+    var postDelete = _ => {
+      var value = "" + Math.random();
+      return credFetch(options.origin + "/cookie/set?" + name + "=" + value + ";" + options.params)
+        .then(_ => credFetch(options.origin + "/cookie/list"))
+        .then(r => r.json())
+        .then(cookies => assert_equals(cookies[name], options.shouldExistViaHTTP ? value : undefined));
+    };
+
+    var name = options.prefix + "prefixtestcookie";
+    if (!options.origin) {
+      options.origin = document.origin;
+      erase_cookie_from_js(name);
+      return postDelete;
+    } else {
+      return credFetch(options.origin + "/cookie/drop?name=" + name)
+        .then(_ => postDelete());
+    }
+  }, options.title);
 }
 
 //
@@ -182,6 +228,7 @@ function create_cookie_from_js(name, value, days, secure_flag) {
 // erase cookie value and set for expiration
 function erase_cookie_from_js(name) {
   create_cookie_from_js(name,"",-1);
+  assert_dom_cookie(name, "", false);
 }
 
 // verify if cookie can be created from js

@@ -49,7 +49,8 @@ func dropCookie(w http.ResponseWriter, r *http.Request) {
   // Expire the named cookie, and return a JSON-encoded success code.
   setNoCacheAndCORSHeaders(w, r)
   w.Header().Set("Content-Type", "application/json; charset=utf-8")
-  http.SetCookie(w, &http.Cookie{Name: name, Value: "_", MaxAge: -1})
+  secureAttribute := (r.URL.Scheme == "https")
+  http.SetCookie(w, &http.Cookie{Name: name, Value: "_", MaxAge: -1, Secure: secureAttribute})
   fmt.Fprint(w, "{\"success\": true}")
 }
 

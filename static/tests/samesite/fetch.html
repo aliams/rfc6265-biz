@@ -9,6 +9,7 @@
       return resetSameSiteCookies(origin, value)
         .then(_ => {
           return credFetch(target + "/cookie/list")
+
             .then(r => r.json())
             .then(cookies => verifySameSiteCookieState(expectedStatus, value, cookies));
         });
