@@ -172,8 +172,8 @@ function verifySameSiteCookieState(expectedStatus, expectedValue, cookies) {
 //
 
 window.SecureStatus = {
-	COOKIE: "yes",
-    NOCOOKIE: "no",
+	INSECURE_COOKIE_ONLY: "1",
+	BOTH_COOKIES: "2",
 };
 
 //Reset SameSite test cookies on |origin|. If |origin| matches `document.origin`, assert
