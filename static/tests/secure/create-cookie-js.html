@@ -40,7 +40,7 @@
   create_test(SECURE_ORIGIN, "path=/", true, "secure origin, root path, no special behavior");
   //You can set a Secure cookie via JS from a secure origin
   create_test(SECURE_ORIGIN, "path=/;Secure", true, "secure origin, root path, secure cookie");
-  //You can set a HTTPOnly cookie via JS from a secure origin, but its only visible via https (test not needed)
-  create_test(SECURE_ORIGIN, "path=/;HttpOnly", false, "secure origin, root path, httponly cookie");
+  //You cannot set a Secure cookie via JS from a secure origin if it's HTTPOnly
+  create_test(SECURE_ORIGIN, "path=/;Secure;HttpOnly", false, "secure origin, root path, httponly cookie");
 
 </script>
