@@ -205,7 +205,7 @@ function overwriteSecureCookie(target, expectedStatus, value, cookies) {
 	
 	//try to modify secure cookie via HTTP
 	var modifiedValue = value+"modified";
-	return overwriteSecureCookies(target, modifiedValue)
+	return credFetch(target + "/cookie/set/secure?" + modifiedValue)
 	.then(_ => {
 	    return credFetch(SECURE_CROSS_SITE_ORIGIN + "/cookie/list")
         .then(r => r.json())
@@ -234,10 +234,6 @@ function verifySecureCookieState(expectedStatus, expectedValue, cookies) {
   } else if (expectedStatus == SecureStatus.BOTH_COOKIES) {
   	assert_equals(cookies["alone_secure"], expectedValue, "Secure cookies are present");
   } 
-}
-
-function overwriteSecureCookies(origin, value) {
-   return credFetch(origin + "/cookie/set/secure?" + value);
 }
 
 //
