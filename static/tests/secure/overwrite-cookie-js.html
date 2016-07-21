@@ -8,17 +8,19 @@
   
       var value = "" + Math.random();
       //start by reliably fetching secure cookies
-      resetSecureCookies(SECURE_ORIGIN, value);
       
-      //TODO - redirect to origin_page
-      
-      //attempt to overwrite via JS with new value
-      document.cookie = name + "=" + value + "modified;" + params;
-      
-      //verify original reset values are there
-      assert_dom_cookie("alone_secure", value, shouldChangeInDOM);
-      assert_dom_cookie("alone_insecure", value, true);
-    
+      //TODO continue testing when secure origin is up!
+      return resetSecureCookies(SECURE_ORIGIN, value)
+      .then(_ => {
+    	//TODO redirect to origin_page
+          
+        //attempt to overwrite via JS with new value
+        document.cookie = name + "=" + value + "modified;" + params;
+          
+        //verify original reset values are there
+        assert_dom_cookie("alone_secure", value, shouldChangeInDOM);
+        assert_dom_cookie("alone_insecure", value, true);
+      })
     }, title);
   }
 
