@@ -28,8 +28,10 @@
     } 
   }
   
-  //cookies set by insecure origins
-  create_test(INSECURE_ORIGIN, INSECURE_ORIGIN, SecureStatus.INSECURE_COOKIE_ONLY, "Secure cookies cannot be set by insecure origins");
+  //cookies set by insecure origin
+  create_test(INSECURE_ORIGIN, INSECURE_ORIGIN, SecureStatus.INSECURE_COOKIE_ONLY, "Secure cookies should be set by insecure origins");
+  
+  //cookies set by secure origin
   create_test(SECURE_CROSS_SITE_ORIGIN, INSECURE_CROSS_SITE_ORIGIN, SecureStatus.INSECURE_COOKIE_ONLY, "Secure cookies should not be read by insecure origins");
   create_test(SECURE_CROSS_SITE_ORIGIN, SECURE_CROSS_SITE_ORIGIN, SecureStatus.BOTH_COOKIES, "Secure cookies should be set and read by secure origins")
 </script>

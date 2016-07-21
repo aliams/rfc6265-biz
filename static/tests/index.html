@@ -243,11 +243,11 @@
   <table>
     <thead>
       <tr>
-        <th rowspan="2">Test Suite</th>
+        <th rowspan="2" colspan="2">Test Suite</th>
         <th colspan="4">Chrome</th>
         <th rowspan="2">Firefox<br>(<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=976073">#976073</a>)</th>
-        <th rowspan="2">Safari<br></th>
-        <th rowspan="2">Edge<br></th>
+        <th rowspan="2">Safari<br>(<a href="#">#TBD</a>)</th>
+        <th rowspan="2">Edge<br>(<a href="#">#TBD</a>)</th>
       </tr>
       <tr>
         <th>51</th><th>52</th><th>53</th><th>54</th>
@@ -255,18 +255,33 @@
     </thead>
     <tbody>
       <tr>
-        <td><a href="secure/create-cookie-http.html">set/read<br/>secure cookie<br/>from HTTP</a></td>
+        <th rowspan="2">create/read</th>
+        <td><a href="secure/create-cookie-http.html"><code>Set-Cookie</code></td>
         <!-- Chrome -->
-        <td class="nada">0/1</td>
-        <td class="complete">1/1</td>
-        <td class="complete">1/1</td>
-        <td class="complete">1/1</td>
+        <td class="partial">?/3</td>
+        <td class="complete">3/3</td>
+        <td class="complete">3/3</td>
+        <td class="complete">3/3</td>
         <!-- Firefox -->
-        <td class="complete">1/1</td>
+        <td class="partial">?/3</td>
         <!-- Safari -->
-        <td class="nada">?/1</td>
+        <td class="partial">?/3</td>
         <!-- Edge -->
-        <td class="nada">?/1</td>
+        <td class="partial">?/3</td>
+      </tr>
+      <tr>
+        <td><a href="secure/create-cookie-js.html"><code>document.cookie</code></td>
+        <!-- Chrome -->
+        <td class="partial">?/?</td>
+        <td class="partial">?/?</td>
+        <td class="partial">?/?</td>
+        <td class="partial">?/?</td>
+        <!-- Firefox -->
+        <td class="partial">?/?</td>
+        <!-- Safari -->
+        <td class="partial">?/?</td>
+        <!-- Edge -->
+        <td class="partial">?/?</td>
       </tr>
     </tbody>
   </table>
