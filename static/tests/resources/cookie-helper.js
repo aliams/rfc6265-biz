@@ -194,6 +194,37 @@ return credFetch(origin + "/cookie/drop/secure")
  })
 }
 
+//Given an |expectedStatus| and |expectedValue|, assert the |cookies| contains the
+//proper set of cookie names and values.
+function overwriteSecureCookie(target, expectedStatus, value, cookies) {
+  
+	//make sure secure cookie is present
+    //---TODO when push to secure server is done
+	//---assert_equals(cookies["alone_insecure"], value, "Insecure cookies are present");
+	assert_equals(cookies["alone_secure"], value, "Secure cookies are present");
+	
+	//try to modify secure cookie via HTTP
+	var modifiedValue = value+"modified";
+	return overwriteSecureCookies(target, modifiedValue)
+	.then(_ => {
+	    return credFetch(SECURE_CROSS_SITE_ORIGIN + "/cookie/list")
+        .then(r => r.json())
+        .then(cookies => verifySecureCookieState(expectedStatus, value, modifiedValue, cookies));
+	 });
+}
+
+//Given an |expectedStatus| and |expectedValue|, assert the |cookies| contains the
+//proper set of cookie names and values.
+function verifySecureCookieState(expectedStatus, expectedValue, modifiedValue, cookies) {
+	//---TODO when push to secure server is done
+	//---assert_equals(cookies["alone_insecure"], modifiedValue, "Insecure cookies are modified");
+  if (expectedStatus == SecureStatus.SECURE_NOT_MODIFIED) {
+  	assert_equals(cookies["alone_secure"], expectedValue, "Secure cookies are not modified");
+  } else if (expectedStatus == SecureStatus.SECURE_MODIFIED) {
+  	assert_equals(cookies["alone_secure"], modifiedValue, "Secure cookies are modified");
+  } 
+}
+
 function overwriteSecureCookies(origin, value) {
    return credFetch(origin + "/cookie/set/secure?" + value);
 }
