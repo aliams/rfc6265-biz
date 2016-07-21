@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<script src="/tests/resources/testharness.js"></script>
+<script src="/tests/resources/testharnessreport.js"></script>
+<script src="/tests/resources/cookie-helper.js"></script>
+<script>
+  function create_test(origin_page, params, shouldChangeInDOM, title) {
+    promise_test(t => {
+  
+      var value = "" + Math.random();
+      //start by reliably fetching secure cookies
+      resetSecureCookies(SECURE_ORIGIN, value);
+      
+      //TODO - redirect to origin_page
+      
+      //attempt to overwrite via JS with new value
+      document.cookie = name + "=" + value + "modified;" + params;
+      
+      //verify original reset values are there
+      assert_dom_cookie("alone_secure", value, shouldChangeInDOM);
+      assert_dom_cookie("alone_insecure", value, true);
+    
+    }, title);
+  }
+
+  //
+  //Assuming initial origin page is insecure
+  //
+  
+  //You cannot overwrite an secure cookie from an insecure origin via JS
+  create_test(INSECURE_ORIGIN, "path=/;", true, "insecure origin, root path, no special behavior");
+  create_test(INSECURE_ORIGIN, "path=/;Secure;", true, "insecure origin, root path, secure cookie");
+  create_test(INSECURE_ORIGIN, "path=/;HttpOnly;", true, "insecure origin, root path, httponly cookie");
+  
+  //
+  //Assuming initial origin page is secure
+  //
+  
+  //You can overwrite a secure cookie from a secure origin via JS
+  create_test(SECURE_ORIGIN, "path=/;", true, "secure origin, root path, no special behavior");
+  //You can overwrite a Secure cookie via JS from a secure origin
+  create_test(SECURE_ORIGIN, "path=/;Secure;", true, "secure origin, root path, secure cookie");
+  //You cannot overwrite a Secure cookie via JS from a secure origin if the new cookie is HTTPOnly
+  create_test(SECURE_ORIGIN, "path=/;HttpOnly;", false, "secure origin, root path, httponly cookie");
+  
+</script>

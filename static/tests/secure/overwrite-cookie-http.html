@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<script src="/tests/resources/testharness.js"></script>
+<script src="/tests/resources/testharnessreport.js"></script>
+<script src="/tests/resources/cookie-helper.js"></script>
+<script>
+  //origin is who sets the cookie
+  //target is who tries to send cookie
+  function create_test(target, expectedStatus, title) {
+    promise_test(t => {
+      //force cookie update securely
+      var value = "" + Math.random();
+      return resetSecureCookies(SECURE_CROSS_SITE_ORIGIN, value)
+        .then(_ => {
+          return credFetch(SECURE_CROSS_SITE_ORIGIN + "/cookie/list")
+            .then(r => r.json())
+            .then(cookies => overwriteSecureCookieState(target, expectedStatus, value, cookies));
+        });
+    }, title);
+  }
+
+  //Given an |expectedStatus| and |expectedValue|, assert the |cookies| contains the
+  //proper set of cookie names and values.
+  function overwriteSecureCookieState(target, expectedStatus, value, cookies) {
+    
+	//make sure secure cookie is present
+    //TODOassert_equals(cookies["alone_insecure"], value, "Insecure cookies are present");
+	assert_equals(cookies["alone_secure"], value, "Secure cookies are present");
+	
+	//try to modify secure cookie via HTTP
+	var modifiedValue = value+"modified";
+	return overwriteSecureCookies(target, modifiedValue)
+	.then(_ => {
+	    return credFetch(SECURE_CROSS_SITE_ORIGIN + "/cookie/list")
+          .then(r => r.json())
+          .then(cookies => verifySecureCookieState(expectedStatus, value, modifiedValue, cookies));
+	 });
+  }
+  
+  //Given an |expectedStatus| and |expectedValue|, assert the |cookies| contains the
+  //proper set of cookie names and values.
+  function verifySecureCookieState(expectedStatus, expectedValue, modifiedValue, cookies) {
+    //TODassert_equals(cookies["alone_insecure"], modifiedValue, "Insecure cookies are modified");
+    if (expectedStatus == SecureStatus.SECURE_NOT_MODIFIED) {
+    	assert_equals(cookies["alone_secure"], expectedValue, "Secure cookies are not modified");
+    } else if (expectedStatus == SecureStatus.SECURE_MODIFIED) {
+    	assert_equals(cookies["alone_secure"], modifiedValue, "Secure cookies are modified");
+    } 
+  }
+  //secure cookie should not be overwritten by insecure origin
+  create_test(INSECURE_CROSS_SITE_ORIGIN, SecureStatus.SECURE_NOT_MODIFIED, "Secure cookies should not be overwritten by insecure origins");
+  //secure cookie should be overwritten by secure origin
+  create_test(SECURE_CROSS_SITE_ORIGIN, SecureStatus.SECURE_MODIFIED, "Secure cookies should be overwritten by secure origins")
+</script>

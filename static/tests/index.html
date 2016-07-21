@@ -238,7 +238,7 @@
   a non-secure origin's ability to set cookies with a <code>secure</code> flag,
   and to overwrite cookies whose <code>secure</code> flag is set. This
   deprecation improves the isolation between HTTP and HTTPS origins, and
-  reduces the risk of malicious interference.</p>
+  reduces the risk of malicious interference.</p> 
 
   <table>
     <thead>
@@ -255,8 +255,8 @@
     </thead>
     <tbody>
       <tr>
-        <th rowspan="2">create/read</th>
-        <td><a href="secure/create-cookie-http.html"><code>Set-Cookie</code></td>
+        <th rowspan="2">set<br/>secure cookie</th>
+        <td><a href="secure/create-cookie-http.html"><code>Set-Cookie</code><br/>non-secure origin</td>
         <!-- Chrome -->
         <td class="partial">?/3</td>
         <td class="complete">3/3</td>
@@ -270,7 +270,36 @@
         <td class="partial">?/3</td>
       </tr>
       <tr>
-        <td><a href="secure/create-cookie-js.html"><code>document.cookie</code></td>
+        <td><a href="secure/create-cookie-js.html"><code>document.cookie</code><br/>non-secure origin</td>
+        <!-- Chrome -->
+        <td class="partial">?/3</td>
+        <td class="complete">3/3</td>
+        <td class="complete">3/3</td>
+        <td class="complete">3/3</td>
+        <!-- Firefox -->
+        <td class="partial">?/3</td>
+        <!-- Safari -->
+        <td class="partial">?/3</td>
+        <!-- Edge -->
+        <td class="partial">?/3</td>
+      </tr>
+            <tr>
+        <th rowspan="2">overwrite<br/>secure cookie</th>
+        <td><a href="secure/overwrite-cookie-http.html"><code>Set-Cookie</code><br/>non-secure origin</td>
+        <!-- Chrome -->
+        <td class="partial">?/3</td>
+        <td class="complete">3/3</td>
+        <td class="complete">3/3</td>
+        <td class="complete">3/3</td>
+        <!-- Firefox -->
+        <td class="partial">?/3</td>
+        <!-- Safari -->
+        <td class="partial">?/3</td>
+        <!-- Edge -->
+        <td class="partial">?/3</td>
+      </tr>
+      <tr>
+      <td><a href="secure/overwrite-cookie-js.html"><code>document.cookie</code><br/>non-secure origin</td>
         <!-- Chrome -->
         <td class="partial">?/3</td>
         <td class="complete">3/3</td>

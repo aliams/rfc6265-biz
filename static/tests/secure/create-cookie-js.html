@@ -3,9 +3,9 @@
 <script src="/tests/resources/testharnessreport.js"></script>
 <script src="/tests/resources/cookie-helper.js"></script>
 <script>
-  function create_test(origin_page, params, shouldExistInDOM, shouldExistViaHTTP, title) {
+  function create_test(origin_page, params, shouldExistInDOM, title) {
     promise_test(t => {
-      var name = "alone_js_testcookie";
+      var name = "create_secure_js_testcookie";
       
       //TODO - make sure all deletes happen from a secure origin
       erase_cookie_from_js(name); //CAUTION
@@ -14,10 +14,10 @@
     
       //TODO - redirect to origin_page?
       assert_dom_cookie(name, value, shouldExistInDOM);
+      
+      //cleanup when done
+      erase_cookie_from_js(name);
 
-      return credFetch("/cookie/list")
-        .then(r => r.json())
-        .then(cookies => assert_equals(cookies[name], shouldExistViaHTTP ? value : undefined));
     }, title);
   }
 
@@ -26,22 +26,21 @@
   //
   
   //basic test
-  create_test(INSECURE_ORIGIN, "path=/;", true, true, "insecure origin, root path, no special behavior");
+  create_test(INSECURE_ORIGIN, "path=/", true, "insecure origin, root path, no special behavior");
   //You cannot set a Secure cookie via JS from an insecure origin
-  create_test(INSECURE_ORIGIN, "path=/;Secure;", false, false, "insecure origin, root path, secure cookie");
-  //You cannot set a HTTPOnly cookie via JS
-  create_test(INSECURE_ORIGIN, "path=/;HttpOnly;", false, false, "insecure origin, root path, httponly cookie");
+  create_test(INSECURE_ORIGIN, "path=/;Secure", false, "insecure origin, root path, secure cookie");
+  //You cannot set a HTTPOnly cookie via JS (test not needed)
+  create_test(INSECURE_ORIGIN, "path=/;HttpOnly", false, "insecure origin, root path, httponly cookie");
   
   //
   //Assuming initial origin page is secure
   //
   
   //basic test
-  create_test(SECURE_ORIGIN, "path=/;", true, true, "secure origin, root path, no special behavior");
+  create_test(SECURE_ORIGIN, "path=/", true, "secure origin, root path, no special behavior");
   //You can set a Secure cookie via JS from a secure origin
-  create_test(SECURE_ORIGIN, "path=/;Secure;", true, true, "secure origin, root path, secure cookie");
-  //You can set a HTTPOnly cookie via JS from a secure origin, but its only visible via https
-  create_test(SECURE_ORIGIN, "path=/;HttpOnly;", false, true, "secure origin, root path, httponly cookie");
-  
- 
+  create_test(SECURE_ORIGIN, "path=/;Secure", true, "secure origin, root path, secure cookie");
+  //You can set a HTTPOnly cookie via JS from a secure origin, but its only visible via https (test not needed)
+  create_test(SECURE_ORIGIN, "path=/;HttpOnly", false, "secure origin, root path, httponly cookie");
+
 </script>

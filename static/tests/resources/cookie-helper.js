@@ -175,6 +175,8 @@ function verifySameSiteCookieState(expectedStatus, expectedValue, cookies) {
 window.SecureStatus = {
 	INSECURE_COOKIE_ONLY: "insecure-cookies-only",
 	BOTH_COOKIES: "both-cookies",
+	SECURE_MODIFIED: "modified",
+	SECURE_NOT_MODIFIED: "not-modified"
 };
 
 //Reset SameSite test cookies on |origin|. If |origin| matches `document.origin`, assert
@@ -190,6 +192,10 @@ return credFetch(origin + "/cookie/drop/secure")
  .then(_ => {
      return credFetch(origin + "/cookie/set/secure?" + value)
  })
+}
+
+function overwriteSecureCookies(origin, value) {
+   return credFetch(origin + "/cookie/set/secure?" + value);
 }
 
 //
